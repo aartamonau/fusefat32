@@ -27,10 +27,10 @@
 
 #include "i18n.h"
 
-/// information about fatfuse32 version
+/// information about fusefat32 version
 #define FUSEFAT32_VERSION "fusefat32 1.4\n"
 
-/// fatfuse32 usage
+/// fusefat32 usage information
 #define FUSEFAT32_USAGE _("usage: %s mountpoint [options]\n"     \
                           "\n"                                   \
                           "general options:\n"                   \
@@ -66,10 +66,10 @@ struct fusefat32_config_t {
  * 
  */
 enum {
-  KEY_VERSION,                  /**< used when user wants to display program
-                                     version */
-  KEY_HELP,                     /**< used when user wants to display program
-                                     usage */
+  KEY_VERSION,                  /**< indicates that user has acquired version
+                                   information */
+  KEY_HELP,                     /**< indicates that user has acquired program
+                                   usage information */
 };
 
 
