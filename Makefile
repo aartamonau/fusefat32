@@ -19,7 +19,7 @@ LIBS     := $(FUSE_LIBS)
 SOURCES := $(shell find $(SRC_DIR) -name *.c -printf "%f\n")
 HEADERS := $(shell find $(INCLUDE_DIR) -name *.h -printf "%f\n")
 
-STANDALONE_TARGETS := clean TAGS doxygen
+STANDALONE_TARGETS := clean TAGS doxygen doxygen-clean
 NONSTANDALONE_GOALS := \
     $(strip $(filter-out $(STANDALONE_TARGETS),$(MAKECMDGOALS)))
 
