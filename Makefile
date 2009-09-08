@@ -13,7 +13,7 @@ FUSE_CPPFLAGS  := $(shell pkg-config fuse --cflags-only-I)
 FUSE_LIBS      := $(shell pkg-config fuse --libs)
 
 CFLAGS   := --std=c99 -Wall $(FUSE_CFLAGS)
-CPPFLAGS := -I $(INCLUDE_DIR) $(FUSE_CPPFLAGS)
+CPPFLAGS := -iquote$(INCLUDE_DIR) $(FUSE_CPPFLAGS)
 LIBS     := $(FUSE_LIBS)
 
 SOURCES := $(shell find $(SRC_DIR) -name *.c -printf "%f\n")
