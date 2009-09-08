@@ -12,7 +12,7 @@
  */
 
 /* workaround allowing to build the filesystem using -std=c99 */
-#define _POSIX_C_SOURCE 199309L
+#define _GNU_SOURCE
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -132,7 +132,7 @@ main(int argc, char *argv[])
   if (config.device == NULL) {
     fputs(_("A device with filesystem must be specified (use `dev` option)\n"),
           stderr);
-  } 
+  }
 
   return EXIT_SUCCESS;
 }
