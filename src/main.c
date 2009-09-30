@@ -135,6 +135,8 @@ main(int argc, char *argv[])
   if (config.device == NULL) {
     fputs(_("A device with filesystem must be specified (use `dev` option)\n"),
           stderr);
+
+    return EXIT_SUCCESS;
   }
 
   enum fat32_error_t ret;
@@ -154,9 +156,9 @@ main(int argc, char *argv[])
     } else {
       fprintf(stderr, "errorcode: %d\n", ret);
     }
-  }
 
-  assert(fat32_close_device(fs) == 0);
+    return EXIT_FAILURE;
+  }
 
   fprintf(stderr, "Bytes per sector: %" PRIu16 "\n",
           fs->bpb->bytes_per_sector);
@@ -188,6 +190,9 @@ main(int argc, char *argv[])
 
   fprintf(stderr, "Boot signature: %#" PRIx8 "\n",
           fs->bpb->boot_signature);
+
+
+  assert(fat32_close_device(fs) == 0);
 
   return EXIT_SUCCESS;
 }
