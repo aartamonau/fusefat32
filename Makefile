@@ -7,7 +7,7 @@ DOC_DIR        := doc
 DOXYGEN_DIR    := $(DOC_DIR)/doxygen
 DOXYGEN_CONFIG := $(DOC_DIR)/Doxyfile
 
-VPATH          := $(SRC_DIR) $(INCLUDE_DIR) $(DOC_DIR)
+VPATH          := $(SRC_DIR) $(INCLUDE_DIR) $(DOC_DIR) $(SRC_DIR)/fat32
 FUSE_CFLAGS    := $(shell pkg-config fuse --cflags-only-other)
 FUSE_CPPFLAGS  := $(shell pkg-config fuse --cflags-only-I)
 FUSE_LIBS      := $(shell pkg-config fuse --libs)

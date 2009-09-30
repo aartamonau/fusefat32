@@ -19,6 +19,7 @@
 #include <errno.h>
 #include <stddef.h>
 #include <string.h>
+#include <assert.h>
 
 #define FUSE_USE_VERSION 26
 
@@ -26,6 +27,8 @@
 #include <fuse_opt.h>
 
 #include "i18n.h"
+
+#include "fat32/fs.h"
 
 /// information about fusefat32 version
 #define FUSEFAT32_VERSION "fusefat32 1.4\n"
@@ -133,6 +136,58 @@ main(int argc, char *argv[])
     fputs(_("A device with filesystem must be specified (use `dev` option)\n"),
           stderr);
   }
+
+  enum fat32_error_t ret;
+  struct fat32_fs_t *fs;
+
+  ret = fat32_open_device(config.device, 0, &fs);
+
+  if (ret == FE_OK) {
+    fputs(_("OK\n"), stderr);
+
+    
+  } else {
+    fputs(_("ERROR\n"), stderr);
+
+    if (ret == FE_ERRNO) {
+      fprintf(stderr, "%s\n", strerror(errno));
+    } else {
+      fprintf(stderr, "errorcode: %d\n", ret);
+    }
+  }
+
+  assert(fat32_close_device(fs) == 0);
+
+  fprintf(stderr, "Bytes per sector: %" PRIu16 "\n",
+          fs->bpb->bytes_per_sector);
+  fprintf(stderr, "Sectors per cluster: %" PRIu8 "\n",
+          fs->bpb->sectors_per_cluster);
+  fprintf(stderr, "Reserved sectors: %" PRIu16 "\n",
+          fs->bpb->reserved_sectors_count);
+  fprintf(stderr, "Number of FATs: %" PRIu8 "\n",
+          fs->bpb->fats_count);
+  fprintf(stderr, "Number of root entries: %" PRIu16 "\n",
+          fs->bpb->root_entries_count);
+
+  fprintf(stderr, "Media type: %#" PRIx8 "\n",
+          fs->bpb->media_type);
+
+  fprintf(stderr, "Sectors per track: %" PRIu16 "\n",
+          fs->bpb->sectors_per_track);
+  fprintf(stderr, "Heads: %" PRIu16 "\n",
+          fs->bpb->heads_number);
+  fprintf(stderr, "Hidden sectors: %" PRIu32 "\n",
+          fs->bpb->hidden_sectors_count);
+  fprintf(stderr, "Total sectors: %" PRIu32 "\n",
+          fs->bpb->total_sectors_count_32);
+
+  fprintf(stderr, "Fat size: %" PRIu32 "\n",
+          fs->bpb->fat_size_32);
+  fprintf(stderr, "Root cluster: %" PRIu32 "\n",
+          fs->bpb->root_cluster);
+
+  fprintf(stderr, "Boot signature: %#" PRIx8 "\n",
+          fs->bpb->boot_signature);
 
   return EXIT_SUCCESS;
 }
