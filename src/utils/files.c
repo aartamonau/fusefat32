@@ -1,16 +1,16 @@
 /**
- * @file   utils.c
- * @author Aliaksiej Artamonaŭ <alieksiej.artamonau@gmail.com>
+ * @file   files.c
+ * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
  * @date   Thu Oct  1 22:55:10 2009
  * 
  * @brief  Implements utility functions declared in
- * @link fat32/utils.h @endlink.
+ * @link utils/files.h @endlink.
  * 
  * 
  */
 #include <errno.h>
 
-#include "fat32/utils.h"
+#include "utils/files.h"
 
 int
 eintr_safe_close(int fd)

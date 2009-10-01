@@ -1,14 +1,15 @@
 /**
- * @file   utils.h
- * @author Aliaksiej Artamonaŭ <alieksiej.artamonau@gmail.com>
- * @date   Thu Oct  1 22:51:23 2009
+ * @file   files.h
+ * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
+ * @date   Thu Oct  1 23:55:01 2009
  * 
- * @brief  Declares common utility functions.
+ * @brief  Utility functions working with files.
  * 
  * 
  */
-#ifndef _UTILS_H_
-#define _UTILS_H_
+
+#ifndef _FILES_H_
+#define _FILES_H_
 
 #include <stdbool.h>
 #include <errno.h>
