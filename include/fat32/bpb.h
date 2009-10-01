@@ -8,6 +8,8 @@
  * 
  */
 
+#include <stdio.h>
+
 #include <inttypes.h>
 
 /// Structure describing all available BPB parameters
@@ -54,3 +56,15 @@ struct fat32_bpb_t {
                                       in root directory */
   uint8_t  fs_type[8];             /**<  filesystem type */
 } __attribute__((packed));
+
+/** 
+ * Prints out verbose information about BPB to specified file.
+ * 
+ * @param file a file to print the information to
+ * @param bpb BPB structure
+ * 
+ * @return Upon success zero is returned. Otherwise negative value is
+ * returned and error is indicated in errno.
+ */
+int
+bpb_verbose_info(FILE *file, struct fat32_bpb_t *bpb);
