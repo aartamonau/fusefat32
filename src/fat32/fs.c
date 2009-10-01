@@ -1,6 +1,6 @@
 /**
  * @file   fs.c
- * @author Aliaksiej Artamonaŭ <alieksiej.artamonau@gmail.com>
+ * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
  * @date   Thu Oct  1 22:54:25 2009
  * 
  * @brief  Implementation of functions for working with FAT32 file system.
@@ -17,7 +17,7 @@
 #include <unistd.h>
 
 #include "fat32/fs.h"
-#include "fat32/utils.h"
+#include "utils/files.h"
 
 /** 
  * Frees all allocated recources for the device.
