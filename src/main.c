@@ -176,7 +176,8 @@ main(int argc, char *argv[])
   }
 
   if (config.verbose) {
-    CHECK_NN_RET(bpb_verbose_info(stderr, fs->bpb), EXIT_FAILURE);
+    CHECK_NN_RET( bpb_verbose_info(stderr, fs->bpb),
+                  EXIT_FAILURE );
   }
 
   assert(fat32_close_device(fs) == 0);

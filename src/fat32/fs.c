@@ -129,6 +129,12 @@ fat32_open_device(char *path, params_t params,
     goto open_device_cleanup;
   }
 
+  /* checking BPB consistency */
+  if (!bpb_check_validity(bpb)) {
+    /* inconsistent */
+    return FE_INVALID_DEV;
+  }
+
   return FE_OK;  
 
  open_device_cleanup:
