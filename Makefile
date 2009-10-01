@@ -2,12 +2,16 @@ NAME := fusefat32
 
 SRC_DIR        := src
 INCLUDE_DIR    := include
+
+SRC_DIRS       := $(shell find $(SRC_DIR) -type d -printf "%p\n")
+INCLUDE_DIRS   := $(shell find $(INCLUDE_DIR) -type d -printf "%p\n")
+
 DOC_DIR        := doc
 
 DOXYGEN_DIR    := $(DOC_DIR)/doxygen
 DOXYGEN_CONFIG := $(DOC_DIR)/Doxyfile
 
-VPATH          := $(SRC_DIR) $(INCLUDE_DIR) $(DOC_DIR) $(SRC_DIR)/fat32
+VPATH          := $(SRC_DIRS) $(INCLUDE_DIRS) $(DOC_DIR)
 FUSE_CFLAGS    := $(shell pkg-config fuse --cflags-only-other)
 FUSE_CPPFLAGS  := $(shell pkg-config fuse --cflags-only-I)
 FUSE_LIBS      := $(shell pkg-config fuse --libs)
@@ -29,7 +33,7 @@ all: $(NAME)
 $(NAME): $(subst .c,.o,$(SOURCES))
 	$(CC) $(LD_FLAGS) $(CFLAGS) $(CPPFLAGS) $^ $(LIBS) -o $@
 
-doxygen: $(SOURCES) $(HEADERS)
+doxygen: $(DOXYGEN_CONFIG) $(SOURCES) $(HEADERS)
 	@doxygen $(DOXYGEN_CONFIG)
 
 .PHONY : doxygen-clean
