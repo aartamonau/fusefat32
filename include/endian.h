@@ -1,9 +1,9 @@
 /**
  * @file   endian.h
- * @author  <aliaksej.artamonau@gmail.com>
+ * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
  * @date   Wed Sep  9 01:18:10 2009
  * 
- * @brief  byteorder conversion functions
+ * @brief  Byteorder conversion functions.
  * 
  * For now this file just includes global @em endian.h header. This is
  * BSD-specific and it's available only since 2.9 of version of glibc.

@@ -1,3 +1,12 @@
+/**
+ * @file   utils.h
+ * @author Aliaksiej Artamonaŭ <alieksiej.artamonau@gmail.com>
+ * @date   Thu Oct  1 22:51:23 2009
+ * 
+ * @brief  Declares common utility functions.
+ * 
+ * 
+ */
 #ifndef _UTILS_H_
 #define _UTILS_H_
 

@@ -1,9 +1,9 @@
 /**
  * @file   main.c
- * @author <aliaksiej.artamonau@gmail.com>
+ * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
  * @date   Tue Sep  8 20:30:41 2009
  * 
- * @brief integrates all filesystem functionality
+ * @brief Integrates all filesystem functionality.
  *
  * This file is the main file of filesystem. It's responsibility is
  * to read needed options and unite all other functionality in a single

@@ -1,15 +1,16 @@
 /**
  * @file   bpb.h
- * @author  <aliaksiej.artamonau@gmail.com>
+ * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
  * @date   Wed Sep  9 12:25:17 2009
  * 
- * @brief  defines data structures describing FAT32 boot sector and
- * bios parameters block
+ * @brief  Defines data structures describing FAT32 boot sector and
+ * bios parameters block.
  * 
  */
 
 #include <inttypes.h>
 
+/// Structure describing all available BPB parameters
 struct fat32_bpb_t {
   uint8_t  jmp_boot[3];            /**< jump instruction to boot code */
   uint8_t  oem_name[8];            /**< OEM name */

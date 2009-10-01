@@ -3,7 +3,7 @@
  * @author  <aliaksiej.artamonau@gmail.com>
  * @date   Tue Sep 29 20:35:58 2009
  * 
- * @brief  defines common function for working with filesystem
+ * @brief  Declares common function for working with filesystem.
  * 
  */
 
