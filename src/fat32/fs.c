@@ -61,7 +61,7 @@ cleanup_device(struct fat32_fs_t* device)
 }
 
 enum fat32_error_t
-fat32_open_device(char *path, params_t params,
+fat32_open_device(const char *path, params_t params,
                   struct fat32_fs_t **device)
 {
   struct fat32_fs_t  *fs_device;

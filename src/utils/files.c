@@ -54,7 +54,7 @@ xread(int fd, void *buf, size_t count)
 }
 
 ssize_t
-xwrite(int fd, void *buf, size_t count)
+xwrite(int fd, const void *buf, size_t count)
 {
   ssize_t nwritten = 0;
   ssize_t ret;

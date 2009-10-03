@@ -17,7 +17,7 @@ const uint16_t MAX_CLUSTER_SIZE = 32 * 1024;
 const uint16_t FAT32_FS_VERSION = 0x0000;
 
 int
-bpb_verbose_info(FILE *file, struct fat32_bpb_t *bpb)
+bpb_verbose_info(FILE *file, const struct fat32_bpb_t *bpb)
 {
   CHECK_NN( fprintf(stderr, "Bytes per sector: %" PRIu16 "\n",
                   bpb->bytes_per_sector) );
@@ -54,14 +54,14 @@ bpb_verbose_info(FILE *file, struct fat32_bpb_t *bpb)
 }
 
 bool
-bpb_check_validity(struct fat32_bpb_t *bpb)
+bpb_check_validity(const struct fat32_bpb_t *bpb)
 {
   /* Checking jmp_boot. Two forms are allowed:
        - jmp_boot[0] == 0xEB && jmp_boot[1] == 0x?? && jmp_boot[2] == 0x90
        - jmp_boot[0] == 0xE9 && jmp_boot[1] == 0x?? && jmp_boot[2] == 0x??
   */
 
-  uint8_t *jmp_boot = bpb->jmp_boot;
+  const uint8_t *jmp_boot = bpb->jmp_boot;
   if ((jmp_boot[0] != 0xEB || jmp_boot[2] != 0x90) && (jmp_boot[0] != 0xE9)) {
     return false;
   }

@@ -75,7 +75,7 @@ struct fat32_bpb_t {
  * returned and error is indicated in errno.
  */
 int
-bpb_verbose_info(FILE *file, struct fat32_bpb_t *bpb);
+bpb_verbose_info(FILE *file, const struct fat32_bpb_t *bpb);
 
 
 /** 
@@ -86,4 +86,4 @@ bpb_verbose_info(FILE *file, struct fat32_bpb_t *bpb);
  * @return @em true if correct. @em false otherwise.
  */
 bool
-bpb_check_validity(struct fat32_bpb_t *bpb);
+bpb_check_validity(const struct fat32_bpb_t *bpb);

@@ -141,7 +141,7 @@ main(int argc, char *argv[])
 {
   struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
   struct fusefat32_config_t config = FUSEFAT32_CONFIG_DEFAULT;
-
+  
   fuse_opt_parse(&args, &config, fusefat32_options, fusefat32_process_options);
 
   /* if we are here then it means that neither version nor help key has been

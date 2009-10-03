@@ -59,6 +59,6 @@ xread(int fd, void *buf, size_t count);
  * @return Number of bytes written. Zero
  */
 ssize_t
-xwrite(int fd, void *buf, size_t count);
+xwrite(int fd, const void *buf, size_t count);
 
 #endif

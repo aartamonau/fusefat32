@@ -57,7 +57,7 @@ typedef uint32_t params_t;
  *         Otherwise NULL is returned and error is indicated by errno.
  */
 enum fat32_error_t
-fat32_open_device(char *path, params_t params,
+fat32_open_device(const char *path, params_t params,
                   struct fat32_fs_t **device);
 
 /** 
