@@ -31,6 +31,7 @@
 
 #include "fat32/fs.h"
 #include "utils/errors.h"
+#include "utils/log.h"
 
 /// information about fusefat32 version
 #define FUSEFAT32_VERSION "fusefat32 1.4\n"
@@ -53,8 +54,21 @@
  */
 struct fusefat32_config_t {
   char *device;                 /**< a path to device to mount */
+  char *log;			/**< a path to log file */
   bool  verbose;                /**< behave verbosely */
+  bool  foreground;		/**< run program in foreground and
+				     do all logging to @em stderr  */
 };
+
+/**
+ * All data needed for program gathered in one place.
+ * 
+ */
+struct fusefat32_t {
+  struct fusefat32_config_t config; /**< config */
+  struct fat32_fs_t *fs;            /**< filesytstem */
+};
+
 
 /// default fusefat32 config
 #define FUSEFAT32_CONFIG_DEFAULT { .device  = NULL, \
@@ -80,7 +94,9 @@ enum {
                                    information */
   KEY_HELP,                     /**< indicates that user has acquired program
                                    usage information */
-  KEY_VERBOSE                   /**< print verbose information while mounting */
+  KEY_VERBOSE,                  /**< print verbose information while mounting */
+  KEY_FOREGROUND		/**< run program in foreground and log all
+				     messages to @em stderr */
 };
 
 
@@ -90,6 +106,7 @@ enum {
  */
 static struct fuse_opt fusefat32_options[] = {
   FUSEFAT32_OPT("dev=%s", device),
+  FUSEFAT32_OPT("log=%s", log),
 
   FUSE_OPT_KEY("--version", KEY_VERSION),
   FUSE_OPT_KEY("-V",        KEY_VERSION),
@@ -108,7 +125,8 @@ static int
 fusefat32_process_options(void *data, const char *arg, int key,
                           struct fuse_args *outargs)
 {
-  struct fusefat32_config_t *config = (struct fusefat32_config_t *) data;
+  struct fusefat32_t        *fusefat32 = (struct fusefat32_t *) data;
+  struct fusefat32_config_t *config    = &fusefat32->config;
 
   switch (key) {
   case KEY_VERSION:
@@ -121,6 +139,9 @@ fusefat32_process_options(void *data, const char *arg, int key,
     exit(EXIT_SUCCESS);
   case KEY_VERBOSE:
     config->verbose = true;
+    break;
+  case KEY_FOREGROUND:
+    config->foreground = true;
     break;
   }
 
@@ -139,30 +160,31 @@ fusefat32_process_options(void *data, const char *arg, int key,
 int
 main(int argc, char *argv[])
 {
-  struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
-  struct fusefat32_config_t config = FUSEFAT32_CONFIG_DEFAULT;
-  
-  fuse_opt_parse(&args, &config, fusefat32_options, fusefat32_process_options);
+  struct fuse_args   args        = FUSE_ARGS_INIT(argc, argv);
+  struct fusefat32_t fusefat32   = { .config = FUSEFAT32_CONFIG_DEFAULT,
+				     .fs     = NULL };
+
+  fuse_opt_parse(&args, &fusefat32, fusefat32_options,
+		 fusefat32_process_options);
+
+  struct fusefat32_config_t *config = &fusefat32.config;
 
   /* if we are here then it means that neither version nor help key has been
      activated
   */
-  if (config.device == NULL) {
-    fputs(_("A device with filesystem must be specified (use `dev` option)\n"),
-          stderr);
+  if (config->device == NULL) {
+    fputs(_("A device to mount must be specified (use `dev` option)\n"),
+	    stderr);
 
-    return EXIT_SUCCESS;
+    return EXIT_FAILURE;
   }
 
   enum fat32_error_t ret;
-  struct fat32_fs_t *fs;
-
-  ret = fat32_open_device(config.device, 0, &fs);
+  ret = fat32_open_device(config->device, 0,
+			  &fusefat32.fs);
 
   if (ret == FE_OK) {
     fputs(_("OK\n"), stderr);
-
-    
   } else {
     fputs(_("ERROR\n"), stderr);
 
@@ -175,12 +197,39 @@ main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
-  if (config.verbose) {
-    CHECK_NN_RET( bpb_verbose_info(stderr, fs->bpb),
+  /* Initializing logging.
+     If @em log option has been specified then we use specified
+     file for logging. If @em foreground option has been chosen then
+     we use @em stderr for logging. If both options has been chosen
+     at the same time then we prefer @em foreground option.
+     Default importance level for logs is @link LOG_WARNING @endlink.
+     If @em verbose flag is set then log level to use is
+     @link LOG_DEBUG @endlink.
+  */
+
+  enum log_level_t log_level = LOG_WARNING;
+  if (config->verbose) {
+    log_level = LOG_DEBUG;
+  }
+
+  if (config->log != NULL && !config->foreground) {
+    int lret = log_init_from_path(config->log, log_level);
+    if (lret < 0) {
+      fprintf(stderr, _("Can't initialize logging facility. Error: %s\n"),
+	      strerror(errno));
+
+      return EXIT_FAILURE;
+    }
+  } else if (config->foreground) {
+    log_init_from_file(stderr, log_level);
+  } /* otherwise no logging required */
+
+  if (fusefat32.config.verbose) {
+    CHECK_NN_RET( bpb_verbose_info(stderr, fusefat32.fs->bpb),
                   EXIT_FAILURE );
   }
 
-  assert(fat32_close_device(fs) == 0);
+  assert(fat32_close_device(fusefat32.fs) == 0);
 
   return EXIT_SUCCESS;
 }
