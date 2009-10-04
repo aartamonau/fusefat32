@@ -18,6 +18,8 @@
 
 #include "fat32/fs.h"
 #include "utils/files.h"
+#include "utils/log.h"
+#include <stdio.h>
 
 /** 
  * Frees all allocated recources for the device.
@@ -88,11 +90,17 @@ fat32_open_device(const char *path, params_t params,
     goto open_device_cleanup;
   }
 
+  int ret = pthread_mutex_init(lock, NULL);
   if (pthread_mutex_init(lock, NULL) != 0) {
     /* we are deallocating memory to hold the invariant described
        at @link fat32_fs_t.write_lock @endlink
     */
     free(lock);
+
+    /* as pthread functions does not set errno we do it manually to keep
+       interface uniform
+    */
+    errno = ret;
     goto open_device_cleanup;
   }
 
@@ -120,7 +128,7 @@ fat32_open_device(const char *path, params_t params,
 
   /* @todo endianness */
   ssize_t nread = xread(fd, fs_device->bpb, sizeof(struct fat32_bpb_t));
-  if (nread > 0) {
+  if (nread >= 0) {
     if (nread < sizeof(struct fat32_bpb_t)) {
       error = FE_INVALID_DEV;
       goto open_device_cleanup;
