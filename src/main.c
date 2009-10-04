@@ -108,12 +108,14 @@ static struct fuse_opt fusefat32_options[] = {
   FUSEFAT32_OPT("dev=%s", device),
   FUSEFAT32_OPT("log=%s", log),
 
-  FUSE_OPT_KEY("--version", KEY_VERSION),
-  FUSE_OPT_KEY("-V",        KEY_VERSION),
-  FUSE_OPT_KEY("--help",    KEY_HELP),
-  FUSE_OPT_KEY("-h",        KEY_HELP),
-  FUSE_OPT_KEY("--verbose", KEY_VERBOSE),
-  FUSE_OPT_KEY("-v",        KEY_VERBOSE),
+  FUSE_OPT_KEY("--version",    KEY_VERSION),
+  FUSE_OPT_KEY("-V",           KEY_VERSION),
+  FUSE_OPT_KEY("--help",       KEY_HELP),
+  FUSE_OPT_KEY("-h",           KEY_HELP),
+  FUSE_OPT_KEY("--verbose",    KEY_VERBOSE),
+  FUSE_OPT_KEY("-v",           KEY_VERBOSE),
+  FUSE_OPT_KEY("-f",           KEY_FOREGROUND),
+  FUSE_OPT_KEY("--foreground", KEY_FOREGROUND),
   FUSE_OPT_END
 };
 
@@ -212,6 +214,7 @@ main(int argc, char *argv[])
     log_level = LOG_DEBUG;
   }
 
+  bool logging_used = false;
   if (config->log != NULL && !config->foreground) {
     int lret = log_init_from_path(config->log, log_level);
     if (lret < 0) {
@@ -219,17 +222,29 @@ main(int argc, char *argv[])
 	      strerror(errno));
 
       return EXIT_FAILURE;
+    } else {
+      logging_used = true;
     }
   } else if (config->foreground) {
     log_init_from_file(stderr, log_level);
+    logging_used = true;
   } /* otherwise no logging required */
 
-  if (fusefat32.config.verbose) {
-    CHECK_NN_RET( bpb_verbose_info(stderr, fusefat32.fs->bpb),
-                  EXIT_FAILURE );
+  int return_code = EXIT_SUCCESS;
+  if (bpb_verbose_info(stderr, fusefat32.fs->bpb) < 0) {
+    goto main_cleanup;
   }
 
-  assert(fat32_close_device(fusefat32.fs) == 0);
+  if (fat32_close_device(fusefat32.fs) < 0) {
+    goto main_cleanup;
+  }
 
   return EXIT_SUCCESS;
+
+ main_cleanup:
+  if (logging_used) {
+    log_close();
+  }
+
+  return return_code;
 }

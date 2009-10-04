@@ -12,6 +12,7 @@
 
 #include "fat32/bpb.h"
 #include "utils/errors.h"
+#include "utils/log.h"
 
 const uint16_t MAX_CLUSTER_SIZE = 32 * 1024;
 const uint16_t FAT32_FS_VERSION = 0x0000;
@@ -19,36 +20,36 @@ const uint16_t FAT32_FS_VERSION = 0x0000;
 int
 bpb_verbose_info(FILE *file, const struct fat32_bpb_t *bpb)
 {
-  CHECK_NN( fprintf(stderr, "Bytes per sector: %" PRIu16 "\n",
-                  bpb->bytes_per_sector) );
-  CHECK_NN( fprintf(stderr, "Sectors per cluster: %" PRIu8 "\n",
-                  bpb->sectors_per_cluster) );
-  CHECK_NN( fprintf(stderr, "Reserved sectors: %" PRIu16 "\n",
-                  bpb->reserved_sectors_count) );
-  CHECK_NN( fprintf(stderr, "Number of FATs: %" PRIu8 "\n",
-                  bpb->fats_count) );
-  CHECK_NN( fprintf(stderr, "Number of root entries: %" PRIu16 "\n",
-                  bpb->root_entries_count) );
+  CHECK_NN( log_debug("Bytes per sector: %" PRIu16,
+		      bpb->bytes_per_sector) );
+  CHECK_NN( log_debug("Sectors per cluster: %" PRIu8,
+		      bpb->sectors_per_cluster) );
+  CHECK_NN( log_debug("Reserved sectors: %" PRIu16,
+		      bpb->reserved_sectors_count) );
+  CHECK_NN( log_debug("Number of FATs: %" PRIu8,
+		      bpb->fats_count) );
+  CHECK_NN( log_debug("Number of root entries: %" PRIu16,
+		      bpb->root_entries_count) );
 
-  CHECK_NN( fprintf(stderr, "Media type: %#" PRIx8 "\n",
-                  bpb->media_type) );
+  CHECK_NN( log_debug("Media type: %#" PRIx8,
+		      bpb->media_type) );
 
-  CHECK_NN( fprintf(stderr, "Sectors per track: %" PRIu16 "\n",
-                  bpb->sectors_per_track) );
-  CHECK_NN( fprintf(stderr, "Heads: %" PRIu16 "\n",
-                  bpb->heads_number) );
-  CHECK_NN( fprintf(stderr, "Hidden sectors: %" PRIu32 "\n",
-                  bpb->hidden_sectors_count) );
-  CHECK_NN( fprintf(stderr, "Total sectors: %" PRIu32 "\n",
-                  bpb->total_sectors_count) );
+  CHECK_NN( log_debug("Sectors per track: %" PRIu16,
+		      bpb->sectors_per_track) );
+  CHECK_NN( log_debug("Heads: %" PRIu16,
+		      bpb->heads_number) );
+  CHECK_NN( log_debug("Hidden sectors: %" PRIu32,
+		      bpb->hidden_sectors_count) );
+  CHECK_NN( log_debug("Total sectors: %" PRIu32,
+		      bpb->total_sectors_count) );
 
-  CHECK_NN( fprintf(stderr, "Fat size: %" PRIu32 "\n",
-                  bpb->fat_size) );
-  CHECK_NN( fprintf(stderr, "Root cluster: %" PRIu32 "\n",
-                  bpb->root_cluster) );
+  CHECK_NN( log_debug("Fat size: %" PRIu32,
+		      bpb->fat_size) );
+  CHECK_NN( log_debug("Root cluster: %" PRIu32,
+		      bpb->root_cluster) );
 
-  CHECK_NN( fprintf(stderr, "Boot signature: %#" PRIx8 "\n",
-                  bpb->boot_signature) );
+  CHECK_NN( log_debug("Boot signature: %#" PRIx8,
+		      bpb->boot_signature) );
 
   return 0;
 }
