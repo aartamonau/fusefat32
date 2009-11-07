@@ -231,7 +231,7 @@ main(int argc, char *argv[])
   } /* otherwise no logging required */
 
   int return_code = EXIT_SUCCESS;
-  if (bpb_verbose_info(stderr, fusefat32.fs->bpb) < 0) {
+  if (bpb_verbose_info(fusefat32.fs->bpb) < 0) {
     goto main_cleanup;
   }
 

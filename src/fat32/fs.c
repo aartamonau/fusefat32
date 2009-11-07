@@ -126,21 +126,11 @@ fat32_open_device(const char *path, params_t params,
     goto open_device_cleanup;
   }
 
-  /* @todo endianness */
-  ssize_t nread = xread(fd, fs_device->bpb, sizeof(struct fat32_bpb_t));
-  if (nread >= 0) {
-    if (nread < sizeof(struct fat32_bpb_t)) {
-      error = FE_INVALID_DEV;
-      goto open_device_cleanup;
-    }
-  } else {
+  enum fat32_error_t reading_result;
+  reading_result = bpb_read(fd, fs_device->bpb);
+  if (reading_result != FE_OK) {
+    error = reading_result;
     goto open_device_cleanup;
-  }
-
-  /* checking BPB consistency */
-  if (!bpb_check_validity(bpb)) {
-    /* inconsistent */
-    return FE_INVALID_DEV;
   }
 
   return FE_OK;  

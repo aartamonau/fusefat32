@@ -9,8 +9,10 @@
  */
 
 #include <stdio.h>
+#include <sys/types.h>
 
 #include "fat32/bpb.h"
+#include "utils/files.h"
 #include "utils/errors.h"
 #include "utils/log.h"
 
@@ -18,7 +20,7 @@ const uint16_t MAX_CLUSTER_SIZE = 32 * 1024;
 const uint16_t FAT32_FS_VERSION = 0x0000;
 
 int
-bpb_verbose_info(FILE *file, const struct fat32_bpb_t *bpb)
+bpb_verbose_info(const struct fat32_bpb_t *bpb)
 {
   CHECK_NN( log_debug("Bytes per sector: %" PRIu16,
 		      bpb->bytes_per_sector) );
@@ -143,12 +145,32 @@ bpb_check_validity(const struct fat32_bpb_t *bpb)
   }
 
   /* fs_info sector can be any sector in reserved area */
-  uint16_t fs_info = bpb->fs_info;
-  if ((fs_info < 1) || (fs_info > bpb->reserved_sectors_count)) {
+  uint16_t fs_info_sector = bpb->fs_info_sector;
+  if ((fs_info_sector < 1) || (fs_info_sector > bpb->reserved_sectors_count)) {
     return false;
   }
 
   /* @todo check backup_boot_sector intersection with fs_info */
 
   return true;
+}
+
+enum fat32_error_t
+bpb_read(int fd, struct fat32_bpb_t *bpb)
+{
+  /* @todo endianess */
+  ssize_t nread = xread(fd, bpb, sizeof(struct fat32_bpb_t));
+  if (nread >= 0) {
+    if (nread < sizeof(struct fat32_bpb_t)) {
+      return FE_INVALID_DEV;
+    }
+  } else {
+    return FE_ERRNO;
+  }
+
+  if (!bpb_check_validity(bpb)) {
+    return FE_INVALID_FS;
+  }
+
+  return FE_OK;
 }

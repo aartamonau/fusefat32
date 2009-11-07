@@ -18,15 +18,7 @@
 #include <pthread.h>
 
 #include "fat32/bpb.h"
-
-enum fat32_error_t {
-  FE_OK,                        /**< no errors occured */
-  FE_ERRNO,                     /**< indicates that errno specifies error */
-  FE_NONBLOCK_DEV,              /**< invalid device is not a block device */
-  FE_INVALID_DEV                /**< invalid device (may be with incorrect
-                                     filesystem)
-                                */
-};
+#include "fat32/errors.h"
 
 /// filesystem device descriptor
 struct fat32_fs_t {

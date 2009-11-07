@@ -13,6 +13,8 @@
 
 #include <inttypes.h>
 
+#include "fat32/errors.h"
+
 /// maximum size of cluster in bytes
 extern const uint16_t MAX_CLUSTER_SIZE;
 
@@ -47,7 +49,7 @@ struct fat32_bpb_t {
   uint16_t fs_version;             /**<  0x0000 for FAT32 */
   uint32_t root_cluster;           /**<  a number of the first cluster of root
                                       directory */
-  uint16_t fs_info;                /**<  sector number of FSINFO in reserved
+  uint16_t fs_info_sector;         /**<  sector number of FSINFO in reserved
                                       area of FAT32 */
   uint16_t backup_boot_sector;     /**<  if non-zero indicates a sector number
                                       in reserved area with boot record
@@ -68,14 +70,13 @@ struct fat32_bpb_t {
 /** 
  * Prints out verbose information about BPB to specified file.
  * 
- * @param file a file to print the information to
  * @param bpb BPB structure
  * 
  * @return Upon success zero is returned. Otherwise negative value is
  * returned and error is indicated in errno.
  */
 int
-bpb_verbose_info(FILE *file, const struct fat32_bpb_t *bpb);
+bpb_verbose_info(const struct fat32_bpb_t *bpb);
 
 
 /** 
@@ -87,3 +88,18 @@ bpb_verbose_info(FILE *file, const struct fat32_bpb_t *bpb);
  */
 bool
 bpb_check_validity(const struct fat32_bpb_t *bpb);
+
+/** 
+ * Reads BPB structure from file and validates it.
+ * 
+ * @param fd File descriptor used to read BPB. As this function
+ *           is assumed to be used only once during driver initialization
+ *           so we do not do any @em lseek and require for file offset to
+ *           be exactly befory BPB on the disk.
+ * @param bpb A pointer to structure where read information must be stored.
+ * 
+ * @return Errors are indicated according to @link fat32_error_t @endlink
+ *         values' descriptions.
+ */
+enum fat32_error_t
+bpb_read(int fd, struct fat32_bpb_t *bpb);
