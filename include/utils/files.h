@@ -31,7 +31,7 @@ xclose(int fd);
  * that all requested data is read by one call (if it's possible).
  *
  * NB: If error is returned by this function then the position of
- * cursor in file is unspecified. Actually some of the data could
+ * cursor in file is undefined. Actually some of the data could
  * have been read successfully.
  * 
  * @param fd file descriptor
@@ -49,7 +49,7 @@ xread(int fd, void *buf, size_t count);
  * that all requested data is written by one call (if it's possible).
  * 
  * NB: If error is returned by this function then the position of
- * cursor in file is unspecified. Actually some of the data could
+ * cursor in file is undefined. Actually some of the data could
  * have been written to the file by the time of error occurence.
  * 
  * @param fd file descriptor
