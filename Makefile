@@ -16,7 +16,7 @@ FUSE_CFLAGS    := $(shell pkg-config fuse --cflags-only-other)
 FUSE_CPPFLAGS  := $(shell pkg-config fuse --cflags-only-I)
 FUSE_LIBS      := $(shell pkg-config fuse --libs)
 
-CFLAGS   := --std=c99 -Wall -Winline $(FUSE_CFLAGS)
+CFLAGS   := --std=c99 -O2 -Wall -Winline $(FUSE_CFLAGS)
 CPPFLAGS := -iquote$(INCLUDE_DIR) $(FUSE_CPPFLAGS)
 LIBS     := $(FUSE_LIBS)
 
