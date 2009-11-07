@@ -7,6 +7,8 @@
  * bios parameters block.
  * 
  */
+#ifndef _BPB_H_
+#define _BPB_H_
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -103,3 +105,5 @@ bpb_check_validity(const struct fat32_bpb_t *bpb);
  */
 enum fat32_error_t
 bpb_read(int fd, struct fat32_bpb_t *bpb);
+
+#endif /* _BPB_H_ */
