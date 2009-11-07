@@ -22,35 +22,39 @@ const uint16_t FAT32_FS_VERSION = 0x0000;
 int
 bpb_verbose_info(const struct fat32_bpb_t *bpb)
 {
-  CHECK_NN( log_debug("Bytes per sector: %" PRIu16,
+  CHECK_NN( log_debug("BPB verbose info: ") );
+
+  CHECK_NN( log_debug("\tBytes per sector: %" PRIu16,
 		      bpb->bytes_per_sector) );
-  CHECK_NN( log_debug("Sectors per cluster: %" PRIu8,
+  CHECK_NN( log_debug("\tSectors per cluster: %" PRIu8,
 		      bpb->sectors_per_cluster) );
-  CHECK_NN( log_debug("Reserved sectors: %" PRIu16,
+  CHECK_NN( log_debug("\tReserved sectors: %" PRIu16,
 		      bpb->reserved_sectors_count) );
-  CHECK_NN( log_debug("Number of FATs: %" PRIu8,
+  CHECK_NN( log_debug("\tNumber of FATs: %" PRIu8,
 		      bpb->fats_count) );
-  CHECK_NN( log_debug("Number of root entries: %" PRIu16,
+  CHECK_NN( log_debug("\tNumber of root entries: %" PRIu16,
 		      bpb->root_entries_count) );
 
-  CHECK_NN( log_debug("Media type: %#" PRIx8,
+  CHECK_NN( log_debug("\tMedia type: %#" PRIx8,
 		      bpb->media_type) );
 
-  CHECK_NN( log_debug("Sectors per track: %" PRIu16,
+  CHECK_NN( log_debug("\tSectors per track: %" PRIu16,
 		      bpb->sectors_per_track) );
-  CHECK_NN( log_debug("Heads: %" PRIu16,
+  CHECK_NN( log_debug("\tHeads: %" PRIu16,
 		      bpb->heads_number) );
-  CHECK_NN( log_debug("Hidden sectors: %" PRIu32,
+  CHECK_NN( log_debug("\tHidden sectors: %" PRIu32,
 		      bpb->hidden_sectors_count) );
-  CHECK_NN( log_debug("Total sectors: %" PRIu32,
+  CHECK_NN( log_debug("\tTotal sectors: %" PRIu32,
 		      bpb->total_sectors_count) );
 
-  CHECK_NN( log_debug("Fat size: %" PRIu32,
+  CHECK_NN( log_debug("\tFat size: %" PRIu32,
 		      bpb->fat_size) );
-  CHECK_NN( log_debug("Root cluster: %" PRIu32,
+  CHECK_NN( log_debug("\tRoot cluster: %" PRIu32,
 		      bpb->root_cluster) );
+  CHECK_NN( log_debug("\tFSInfo sector: %" PRIu32,
+		      bpb->fs_info_sector) );
 
-  CHECK_NN( log_debug("Boot signature: %#" PRIx8,
+  CHECK_NN( log_debug("\tBoot signature: %#" PRIx8,
 		      bpb->boot_signature) );
 
   return 0;
