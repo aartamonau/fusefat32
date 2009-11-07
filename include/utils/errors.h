@@ -1,5 +1,5 @@
 /**
- * @file   errors.h
+ * @file   utils/errors.h
  * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
  * @date   Thu Oct  1 23:56:03 2009
  * 

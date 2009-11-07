@@ -1,5 +1,5 @@
 /**
- * @file   errors.h
+ * @file   fat32/errors.h
  * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
  * @date   Sat Nov  7 17:44:58 2009
  * 
