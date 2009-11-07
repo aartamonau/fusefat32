@@ -10,7 +10,6 @@
  * 
  */
 
-
-#define INLINE extern
+#define EXTERN_INLINE_DEFINITIONS
 
 #include "fat32/utils.h"

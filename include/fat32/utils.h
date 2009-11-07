@@ -14,10 +14,7 @@
 #include <inttypes.h>
 
 #include "fat32/bpb.h"
-
-#ifndef INLINE
-  #define INLINE inline
-#endif
+#include "utils/inlines.h"
 
 /** 
  * Transforms a number of sector to file offset.
@@ -32,7 +29,5 @@ fat32_sector_to_offset(const struct fat32_bpb_t *bpb, uint32_t sector)
 {
   return (off_t) bpb->bytes_per_sector * (off_t) sector;
 }
-
-
 
 #endif /* _UTILS_H_ */
