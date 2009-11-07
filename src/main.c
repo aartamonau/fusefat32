@@ -214,8 +214,8 @@ main(int argc, char *argv[])
 
 
   enum fat32_error_t ret;
-  ret = fat32_open_device(config->device, 0,
-			  &fusefat32.fs);
+  ret = fat32_fs_open(config->device, 0,
+		      &fusefat32.fs);
 
   if (ret == FE_OK) {
     fputs(_("OK\n"), stderr);
@@ -232,15 +232,15 @@ main(int argc, char *argv[])
   }
 
   int return_code = EXIT_SUCCESS;
-  if (bpb_verbose_info(fusefat32.fs->bpb) < 0) {
+  if (fat32_bpb_verbose_info(fusefat32.fs->bpb) < 0) {
     goto main_cleanup;
   }
 
-  if (fs_info_verbose_info(fusefat32.fs->fs_info) < 0) {
+  if (fat32_fs_info_verbose_info(fusefat32.fs->fs_info) < 0) {
     goto main_cleanup;
   }
 
-  if (fat32_close_device(fusefat32.fs) < 0) {
+  if (fat32_fs_close(fusefat32.fs) < 0) {
     goto main_cleanup;
   }
 

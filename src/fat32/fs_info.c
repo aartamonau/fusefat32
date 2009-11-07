@@ -30,7 +30,7 @@ const uint32_t FS_INFO_STRUCT_SIGNATURE = 0x61417272;
 const uint32_t FS_INFO_TRAIL_SIGNATURE  = 0xaa550000;
 
 bool
-fs_info_check_validity(const struct fat32_fs_info_t *fs_info)
+fat32_fs_info_check_validity(const struct fat32_fs_info_t *fs_info)
 {
   /* actually only three signatures must be checked */
   return (fs_info->lead_signature   == FS_INFO_LEAD_SIGNATURE)   && \
@@ -39,7 +39,7 @@ fs_info_check_validity(const struct fat32_fs_info_t *fs_info)
 }
 
 int
-fs_info_verbose_info(const struct fat32_fs_info_t *fs_info)
+fat32_fs_info_verbose_info(const struct fat32_fs_info_t *fs_info)
 {
   CHECK_NN( log_debug("FSInfo verbose info: ") );
 
@@ -58,10 +58,10 @@ fs_info_verbose_info(const struct fat32_fs_info_t *fs_info)
 }
 
 enum fat32_error_t
-fs_info_read(int fd, const struct fat32_bpb_t *bpb,
-	     struct fat32_fs_info_t *fs_info)
+fat32_fs_info_read(int fd, const struct fat32_bpb_t *bpb,
+		   struct fat32_fs_info_t *fs_info)
 {
-  off_t fs_info_offset = sector_to_offset(bpb, bpb->fs_info_sector);
+  off_t fs_info_offset = fat32_sector_to_offset(bpb, bpb->fs_info_sector);
   off_t old_offset     = lseek(fd, fs_info_offset, SEEK_SET);
   if (old_offset == (off_t) -1) {
     return FE_ERRNO;
@@ -77,7 +77,7 @@ fs_info_read(int fd, const struct fat32_bpb_t *bpb,
     return FE_ERRNO;
   }
 
-  if (!fs_info_check_validity(fs_info)) {
+  if (!fat32_fs_info_check_validity(fs_info)) {
     return FE_INVALID_FS;
   }
 

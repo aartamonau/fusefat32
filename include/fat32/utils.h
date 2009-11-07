@@ -28,7 +28,7 @@
  * @return offset in file
  */
 INLINE off_t
-sector_to_offset(const struct fat32_bpb_t *bpb, uint32_t sector)
+fat32_sector_to_offset(const struct fat32_bpb_t *bpb, uint32_t sector)
 {
   return (off_t) bpb->bytes_per_sector * (off_t) sector;
 }

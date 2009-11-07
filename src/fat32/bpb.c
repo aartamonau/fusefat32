@@ -20,7 +20,7 @@ const uint16_t MAX_CLUSTER_SIZE = 32 * 1024;
 const uint16_t FAT32_FS_VERSION = 0x0000;
 
 int
-bpb_verbose_info(const struct fat32_bpb_t *bpb)
+fat32_bpb_verbose_info(const struct fat32_bpb_t *bpb)
 {
   CHECK_NN( log_debug("BPB verbose info: ") );
 
@@ -61,7 +61,7 @@ bpb_verbose_info(const struct fat32_bpb_t *bpb)
 }
 
 bool
-bpb_check_validity(const struct fat32_bpb_t *bpb)
+fat32_bpb_check_validity(const struct fat32_bpb_t *bpb)
 {
   /* Checking jmp_boot. Two forms are allowed:
        - jmp_boot[0] == 0xEB && jmp_boot[1] == 0x?? && jmp_boot[2] == 0x90
@@ -160,7 +160,7 @@ bpb_check_validity(const struct fat32_bpb_t *bpb)
 }
 
 enum fat32_error_t
-bpb_read(int fd, struct fat32_bpb_t *bpb)
+fat32_bpb_read(int fd, struct fat32_bpb_t *bpb)
 {
   /* @todo endianess */
   ssize_t nread = xread(fd, bpb, sizeof(struct fat32_bpb_t));
@@ -172,7 +172,7 @@ bpb_read(int fd, struct fat32_bpb_t *bpb)
     return FE_ERRNO;
   }
 
-  if (!bpb_check_validity(bpb)) {
+  if (!fat32_bpb_check_validity(bpb)) {
     return FE_INVALID_FS;
   }
 

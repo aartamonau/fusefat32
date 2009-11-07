@@ -78,7 +78,7 @@ struct fat32_bpb_t {
  * returned and error is indicated in errno.
  */
 int
-bpb_verbose_info(const struct fat32_bpb_t *bpb);
+fat32_bpb_verbose_info(const struct fat32_bpb_t *bpb);
 
 
 /** 
@@ -89,7 +89,7 @@ bpb_verbose_info(const struct fat32_bpb_t *bpb);
  * @return @em true if correct. @em false otherwise.
  */
 bool
-bpb_check_validity(const struct fat32_bpb_t *bpb);
+fat32_bpb_check_validity(const struct fat32_bpb_t *bpb);
 
 /** 
  * Reads BPB structure from file and validates it.
@@ -104,6 +104,6 @@ bpb_check_validity(const struct fat32_bpb_t *bpb);
  *         values' descriptions.
  */
 enum fat32_error_t
-bpb_read(int fd, struct fat32_bpb_t *bpb);
+fat32_bpb_read(int fd, struct fat32_bpb_t *bpb);
 
 #endif /* _BPB_H_ */

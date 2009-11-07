@@ -21,13 +21,14 @@
 #include "fat32/fs_info.h"
 #include "fat32/errors.h"
 
-/// filesystem device descriptor
+/// filesystem descriptor
 struct fat32_fs_t {
-  int fd;                          /**< file descriptor of device */
+  int fd;                          /**< file descriptor of device where
+				      filesystem is stored */
 
   pthread_mutex_t *write_lock;     /**< Mutex to lock on writing.
                                         Assume the following invariant:
-                                        if @em write_lock is not NULL then it's
+                                        if @em write_lock is not NULL then it
                                         has been correctly initialized using
                                         @link pthread_mutex_init @endlink
                                    */
@@ -43,28 +44,27 @@ struct fat32_fs_t {
 typedef uint32_t params_t;
 
 /** 
- * Opens a device for future work.
+ * Opens a filesystem for future work.
  * 
- * @param path a path to the device
+ * @param path   a path to the device containing filestystem
  * @param params opening parameters (currently not used)
+ * @param fs     a pointer where a pointer to resulting file system structure
+ *               will be stored
  * 
- * @return A pointer to created device is returned in case of success.
- *         Otherwise NULL is returned and error is indicated by errno.
+ * @return status of performed operation
  */
 enum fat32_error_t
-fat32_open_device(const char *path, params_t params,
-                  struct fat32_fs_t **device);
+fat32_fs_open(const char *path, params_t params,
+	      struct fat32_fs_t **fs);
 
 /** 
- * Closes device created by the call of @link fat32_open_device @endlink
+ * Closes filesystem created by the call of @link fat32_fs_open @endlink
  * 
- * @param device a device to close
+ * @param fs a file system structure to close
  * 
- * @return As Linus Torvalds noted programmers does not like to check errors
- *         on closing files. Anyway, 0 is returned in case of success and -1
- *         if any error has occured.
+ * @return status of performed action
  */
-int
-fat32_close_device(struct fat32_fs_t *device);
+enum fat32_error_t
+fat32_fs_close(struct fat32_fs_t *fs);
 
 #endif

@@ -24,7 +24,7 @@
  * @return 0 on success, -1 otherwise
  */
 int
-eintr_safe_close(int fd);
+xclose(int fd);
 
 /** 
  * Analogue of standard @em read system call which ensures

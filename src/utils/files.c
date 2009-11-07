@@ -13,7 +13,7 @@
 #include "utils/files.h"
 
 int
-eintr_safe_close(int fd)
+xclose(int fd)
 {
   int res;
 

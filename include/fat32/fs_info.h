@@ -48,7 +48,7 @@ struct fat32_fs_info_t {
  * @return @em true if correct. @em false otherwise.
  */
 bool
-fs_info_check_validity(const struct fat32_fs_info_t *fs_info);
+fat32_fs_info_check_validity(const struct fat32_fs_info_t *fs_info);
 
 /** 
  * Logs verbose information about FSInfo sector.
@@ -59,7 +59,7 @@ fs_info_check_validity(const struct fat32_fs_info_t *fs_info);
  * returned and error is indicated in errno.
  */
 int
-fs_info_verbose_info(const struct fat32_fs_info_t *fs_info);
+fat32_fs_info_verbose_info(const struct fat32_fs_info_t *fs_info);
 
 /** 
  * Read fs_info structure from file. An offset from which reading occures
@@ -74,7 +74,7 @@ fs_info_verbose_info(const struct fat32_fs_info_t *fs_info);
  *         values' descriptions
  */
 enum fat32_error_t
-fs_info_read(int fd, const struct fat32_bpb_t *bpb,
-	     struct fat32_fs_info_t *fs_info);
+fat32_fs_info_read(int fd, const struct fat32_bpb_t *bpb,
+		   struct fat32_fs_info_t *fs_info);
 
 #endif /* _FS_INFO_H_ */

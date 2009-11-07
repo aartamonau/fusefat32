@@ -22,55 +22,55 @@
 #include <stdio.h>
 
 /** 
- * Frees all allocated recources for the device.
+ * Frees all resources allocated for the file system.
  * 
- * @param device a device to free
+ * @param fs a file system structure
  * 
  * @return 0 on success, -1 otherwise
  */
 static inline int
-cleanup_device(struct fat32_fs_t* device)
+fat32_fs_cleanup(struct fat32_fs_t* fs)
 {
-  if (device != NULL) {
+  if (fs != NULL) {
     /* trying to close file descriptor first in order to give
        possibility to retry on error to the user
     */
-    if (device->fd != -1) {
-      int ret = eintr_safe_close(device->fd);
+    if (fs->fd != -1) {
+      int ret = xclose(fs->fd);
       if (ret != 0) {
         return ret;
       }
     }
 
-    if (device->write_lock != NULL) {
+    if (fs->write_lock != NULL) {
       /* by invariant we assume that lock has been intitialized */
-      int ret = pthread_mutex_destroy(device->write_lock);
+      int ret = pthread_mutex_destroy(fs->write_lock);
       if (ret != 0) {
         return ret;
       }
 
-      free(device->write_lock);
+      free(fs->write_lock);
     }
 
-    if (device->bpb != NULL) {
-      free(device->bpb);
+    if (fs->bpb != NULL) {
+      free(fs->bpb);
     }
 
-    if (device->fs_info != NULL) {
-      free(device->fs_info);
+    if (fs->fs_info != NULL) {
+      free(fs->fs_info);
     }
 
-    free(device);
+    free(fs);
   }
 
   return 0;
 }
 
 enum fat32_error_t
-fat32_open_device(const char *path, params_t params,
-                  struct fat32_fs_t **device)
+fat32_fs_open(const char *path, params_t params,
+	      struct fat32_fs_t **result)
 {
-  struct fat32_fs_t      *fs_device;
+  struct fat32_fs_t      *fs;
   struct fat32_bpb_t     *bpb;
   struct fat32_fs_info_t *fs_info;
   struct stat             dev_stat;
@@ -79,17 +79,17 @@ fat32_open_device(const char *path, params_t params,
 
   int fd;
 
-  fs_device = (struct fat32_fs_t *) malloc(sizeof(struct fat32_fs_t));
-  if (fs_device == NULL) {
-    goto open_device_error;
+  fs = (struct fat32_fs_t *) malloc(sizeof(struct fat32_fs_t));
+  if (fs == NULL) {
+    goto open_fs_error;
   }
 
-  *device = fs_device;
+  *result = fs;
 
-  fs_device->fd         = -1;
-  fs_device->bpb        = NULL;
-  fs_device->fs_info    = NULL;
-  fs_device->write_lock = NULL;
+  fs->fd         = -1;
+  fs->bpb        = NULL;
+  fs->fs_info    = NULL;
+  fs->write_lock = NULL;
 
   lock = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
   if (lock == NULL) {
@@ -114,19 +114,19 @@ fat32_open_device(const char *path, params_t params,
   if (bpb == NULL) {
     goto open_device_cleanup;
   }
-  fs_device->bpb = bpb;
+  fs->bpb = bpb;
 
   fs_info = (struct fat32_fs_info_t *) malloc(sizeof(struct fat32_fs_info_t));
   if (fs_info == NULL) {
     goto open_device_cleanup;
   }
-  fs_device->fs_info = fs_info;
+  fs->fs_info = fs_info;
 
   fd = open(path, O_RDWR);
   if (fd < 0) {
     goto open_device_cleanup;
   }
-  fs_device->fd = fd;
+  fs->fd = fd;
 
   if (fstat(fd, &dev_stat) < 0) {
     goto open_device_cleanup;
@@ -139,13 +139,13 @@ fat32_open_device(const char *path, params_t params,
   }
 
   enum fat32_error_t reading_result;
-  reading_result = bpb_read(fd, fs_device->bpb);
+  reading_result = fat32_bpb_read(fd, fs->bpb);
   if (reading_result != FE_OK) {
     error = reading_result;
     goto open_device_cleanup;
   }
 
-  reading_result = fs_info_read(fd, bpb, fs_device->fs_info);
+  reading_result = fat32_fs_info_read(fd, bpb, fs->fs_info);
   if (reading_result != FE_OK) {
     error = reading_result;
     goto open_device_cleanup;
@@ -155,14 +155,18 @@ fat32_open_device(const char *path, params_t params,
 
  open_device_cleanup:
   /* @todo make something more sensible with return value */
-  assert(cleanup_device(fs_device) == 0);
+  assert(fat32_fs_cleanup(fs) == 0);
 
- open_device_error:
+ open_fs_error:
   return error;
 }
 
-int
-fat32_close_device(struct fat32_fs_t *device)
+enum fat32_error_t
+fat32_fs_close(struct fat32_fs_t *fs)
 {
-  return cleanup_device(device);
+  if (fat32_fs_cleanup(fs) == 0) {
+    return FE_OK;
+  } else {
+    return FE_ERRNO;
+  }
 }
