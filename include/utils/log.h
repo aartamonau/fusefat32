@@ -1,5 +1,5 @@
 /**
- * @file   logging.h
+ * @file   log.h
  * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
  * @date   Sat Oct  3 16:40:14 2009
  * 
@@ -14,6 +14,8 @@
 
 #ifndef _LOG_H_
 #define _LOG_H_
+
+#include <stdio.h>
 
 /**
  * Importance of log messages. Types are almost the same as @em syslog
