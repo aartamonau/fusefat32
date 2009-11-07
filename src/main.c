@@ -181,24 +181,6 @@ main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
-  enum fat32_error_t ret;
-  ret = fat32_open_device(config->device, 0,
-			  &fusefat32.fs);
-
-  if (ret == FE_OK) {
-    fputs(_("OK\n"), stderr);
-  } else {
-    fputs(_("ERROR\n"), stderr);
-
-    if (ret == FE_ERRNO) {
-      fprintf(stderr, "%s\n", strerror(errno));
-    } else {
-      fprintf(stderr, "errorcode: %d\n", ret);
-    }
-
-    return EXIT_FAILURE;
-  }
-
   /* Initializing logging.
      If @em log option has been specified then we use specified
      file for logging. If @em foreground option has been chosen then
@@ -230,8 +212,31 @@ main(int argc, char *argv[])
     logging_used = true;
   } /* otherwise no logging required */
 
+
+  enum fat32_error_t ret;
+  ret = fat32_open_device(config->device, 0,
+			  &fusefat32.fs);
+
+  if (ret == FE_OK) {
+    fputs(_("OK\n"), stderr);
+  } else {
+    fputs(_("ERROR\n"), stderr);
+
+    if (ret == FE_ERRNO) {
+      fprintf(stderr, "%s\n", strerror(errno));
+    } else {
+      fprintf(stderr, "errorcode: %d\n", ret);
+    }
+
+    return EXIT_FAILURE;
+  }
+
   int return_code = EXIT_SUCCESS;
   if (bpb_verbose_info(fusefat32.fs->bpb) < 0) {
+    goto main_cleanup;
+  }
+
+  if (fs_info_verbose_info(fusefat32.fs->fs_info) < 0) {
     goto main_cleanup;
   }
 
