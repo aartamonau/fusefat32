@@ -56,6 +56,10 @@ cleanup_device(struct fat32_fs_t* device)
       free(device->bpb);
     }
 
+    if (device->fs_info != NULL) {
+      free(device->fs_info);
+    }
+
     free(device);
   }
 
@@ -66,11 +70,12 @@ enum fat32_error_t
 fat32_open_device(const char *path, params_t params,
                   struct fat32_fs_t **device)
 {
-  struct fat32_fs_t  *fs_device;
-  struct fat32_bpb_t *bpb;
-  struct stat         dev_stat;
-  pthread_mutex_t    *lock;
-  enum fat32_error_t  error = FE_ERRNO;
+  struct fat32_fs_t      *fs_device;
+  struct fat32_bpb_t     *bpb;
+  struct fat32_fs_info_t *fs_info;
+  struct stat             dev_stat;
+  pthread_mutex_t        *lock;
+  enum fat32_error_t      error = FE_ERRNO;
 
   int fd;
 
@@ -83,6 +88,7 @@ fat32_open_device(const char *path, params_t params,
 
   fs_device->fd         = -1;
   fs_device->bpb        = NULL;
+  fs_device->fs_info    = NULL;
   fs_device->write_lock = NULL;
 
   lock = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
@@ -110,6 +116,12 @@ fat32_open_device(const char *path, params_t params,
   }
   fs_device->bpb = bpb;
 
+  fs_info = (struct fat32_fs_info_t *) malloc(sizeof(struct fat32_fs_info_t));
+  if (fs_info == NULL) {
+    goto open_device_cleanup;
+  }
+  fs_device->fs_info = fs_info;
+
   fd = open(path, O_RDWR);
   if (fd < 0) {
     goto open_device_cleanup;
@@ -128,6 +140,12 @@ fat32_open_device(const char *path, params_t params,
 
   enum fat32_error_t reading_result;
   reading_result = bpb_read(fd, fs_device->bpb);
+  if (reading_result != FE_OK) {
+    error = reading_result;
+    goto open_device_cleanup;
+  }
+
+  reading_result = fs_info_read(fd, bpb, fs_device->fs_info);
   if (reading_result != FE_OK) {
     error = reading_result;
     goto open_device_cleanup;

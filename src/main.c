@@ -236,6 +236,10 @@ main(int argc, char *argv[])
     goto main_cleanup;
   }
 
+  if (fs_info_verbose_info(fusefat32.fs->fs_info) < 0) {
+    goto main_cleanup;
+  }
+
   if (fat32_close_device(fusefat32.fs) < 0) {
     goto main_cleanup;
   }

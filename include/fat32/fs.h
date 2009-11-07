@@ -18,22 +18,25 @@
 #include <pthread.h>
 
 #include "fat32/bpb.h"
+#include "fat32/fs_info.h"
 #include "fat32/errors.h"
 
 /// filesystem device descriptor
 struct fat32_fs_t {
-  int fd;                       /**< file descriptor of device */
+  int fd;                          /**< file descriptor of device */
 
-  pthread_mutex_t *write_lock;  /**< Mutex to lock on writing.
-                                      Assume the following invariant:
-                                      if @em write_lock is not NULL then it's
-                                      has been correctly initialized using
-                                      @link pthread_mutex_init @endlink
-                                */
+  pthread_mutex_t *write_lock;     /**< Mutex to lock on writing.
+                                        Assume the following invariant:
+                                        if @em write_lock is not NULL then it's
+                                        has been correctly initialized using
+                                        @link pthread_mutex_init @endlink
+                                   */
   
-  uint64_t size;                /**< size of underlying block device in bytes */
+  uint64_t size;                   /**< size of underlying block device in
+				      bytes */
 
-  struct fat32_bpb_t *bpb;      /**< bios parameters block */
+  struct fat32_bpb_t *bpb;         /**< bios parameters block */
+  struct fat32_fs_info_t *fs_info; /**< FSInfo */
 };
 
 /// filesystem parameters
