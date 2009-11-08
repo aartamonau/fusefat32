@@ -62,7 +62,7 @@ int
 fat32_fs_info_verbose_info(const struct fat32_fs_info_t *fs_info);
 
 /** 
- * Read fs_info structure from file. An offset from which reading occures
+ * Read fs_info structure from file. An offset from which reading occurs
  * is taken from BPB. This functions restores original file position after
  * reading all needed data.
  * 

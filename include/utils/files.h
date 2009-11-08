@@ -16,7 +16,7 @@
 #include <unistd.h>
 
 /** 
- * Closes file descriptor retrying if EINTR occures. All other errors
+ * Closes file descriptor retrying if EINTR occurs. All other errors
  * are indicated as usual.
  * 
  * @param fd file descriptor to close
