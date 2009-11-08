@@ -19,11 +19,12 @@
 
 #include "fat32/bpb.h"
 #include "fat32/fs_info.h"
+#include "fat32/fat.h"
 #include "fat32/errors.h"
 
 /// filesystem descriptor
 struct fat32_fs_t {
-  int fd;                          /**< file descriptor of device where
+  int              fd;             /**< file descriptor of device where
 				      filesystem is stored */
 
   pthread_mutex_t *write_lock;     /**< Mutex to lock on writing.
@@ -36,8 +37,9 @@ struct fat32_fs_t {
   uint64_t size;                   /**< size of underlying block device in
 				      bytes */
 
-  struct fat32_bpb_t *bpb;         /**< bios parameters block */
+  struct fat32_bpb_t     *bpb;     /**< bios parameters block */
   struct fat32_fs_info_t *fs_info; /**< FSInfo */
+  struct fat32_fat_t     *fat;	   /**< FAT-related data */
 };
 
 /// filesystem parameters
@@ -56,15 +58,5 @@ typedef uint32_t params_t;
 enum fat32_error_t
 fat32_fs_open(const char *path, params_t params,
 	      struct fat32_fs_t **fs);
-
-/** 
- * Closes filesystem created by the call of @link fat32_fs_open @endlink
- * 
- * @param fs a file system structure to close
- * 
- * @return status of performed action
- */
-enum fat32_error_t
-fat32_fs_close(struct fat32_fs_t *fs);
 
 #endif
