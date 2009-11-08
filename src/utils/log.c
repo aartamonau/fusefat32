@@ -42,6 +42,8 @@ static bool restricted;
 /// minimum importance level a message must have to be logged
 static enum log_level_t log_level;
 
+/// defines the messages that are displayed before logged text for
+/// each log level
 static const char *LEVEL_MESSAGES [] = { [LOG_DEBUG]    = "DEBUG",
 					 [LOG_INFO]     = "INFO",
 					 [LOG_NOTICE]   = "NOTICE",
