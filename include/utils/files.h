@@ -14,6 +14,19 @@
 #include <stdbool.h>
 #include <errno.h>
 #include <unistd.h>
+#include <sys/stat.h>
+
+/** 
+ * Opens a file. Retries if EINTR occurs. All other errors are indicated
+ * as in usual @em open system call.
+ * 
+ * @param path  path to file to open
+ * @param oflag opening flags
+ * 
+ * @return 0 on success, -1 otherwise
+ */
+int
+xopen(const char *path, int oflag, ...);
 
 /** 
  * Closes file descriptor retrying if EINTR occurs. All other errors

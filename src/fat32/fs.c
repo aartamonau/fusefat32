@@ -122,7 +122,7 @@ fat32_fs_open(const char *path, params_t params,
   }
   fs->fs_info = fs_info;
 
-  fd = open(path, O_RDWR);
+  fd = xopen(path, O_RDWR);
   if (fd < 0) {
     goto open_device_cleanup;
   }
