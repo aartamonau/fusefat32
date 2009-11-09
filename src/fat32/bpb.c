@@ -178,3 +178,14 @@ fat32_bpb_read(int fd, struct fat32_bpb_t *bpb)
 
   return FE_OK;
 }
+
+uint32_t
+fat32_bpb_clusters_count(const struct fat32_bpb_t *bpb)
+{
+  uint32_t total    = bpb->total_sectors_count;
+  uint32_t reserved = bpb->reserved_sectors_count;
+  uint32_t fat      = bpb->fats_count * bpb->fat_size;
+  uint32_t data_sectors = total - reserved - fat;
+
+  return data_sectors / bpb->sectors_per_cluster;
+}

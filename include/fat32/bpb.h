@@ -106,4 +106,14 @@ fat32_bpb_check_validity(const struct fat32_bpb_t *bpb);
 enum fat32_error_t
 fat32_bpb_read(int fd, struct fat32_bpb_t *bpb);
 
+/** 
+ * Calculates the number of clusters on the file system.
+ * 
+ * @param bpb BPB of the file system
+ * 
+ * @return number of clusters
+ */
+uint32_t
+fat32_bpb_clusters_count(const struct fat32_bpb_t *bpb);
+
 #endif /* _BPB_H_ */
