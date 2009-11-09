@@ -98,8 +98,8 @@ bool
 fat32_fat_cluster_is_null(uint32_t cluster);
 
 /** 
- * Indicates whether the cluster got by @link fat32_fat_next_cluster @endlink
- * operation actually means that the former cluster is unused.
+ * Indicates whether the cluster number which is stored in directory of some
+ * file means that this file is empty.
  * 
  * @param cluster a number of cluster to check
  * 

@@ -72,10 +72,11 @@ fat32_fat_next_cluster(const struct fat32_fat_t *fat,
   return FE_OK;
 }
 
+static const uint32_t FAT32_FAT_ENTRY_EOC = 0x0ffffff8;
 bool
 fat32_fat_cluster_is_null(uint32_t cluster)
 {
-  return cluster == FAT32_FAT_ENTRY_MASK;
+  return cluster >= FAT32_FAT_ENTRY_EOC;
 }
 
 bool
