@@ -59,4 +59,14 @@ enum fat32_error_t
 fat32_fs_open(const char *path, params_t params,
 	      struct fat32_fs_t **fs);
 
+/** 
+ * Closes filesystem created by the call of @link fat32_fs_open @endlink
+ * 
+ * @param fs a file system structure to close
+ * 
+ * @return status of performed action
+ */
+enum fat32_error_t
+fat32_fs_close(struct fat32_fs_t *fs);
+
 #endif
