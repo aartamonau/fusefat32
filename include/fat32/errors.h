@@ -11,6 +11,10 @@
 #ifndef _FS_ERRORS_H_
 #define _FS_ERRORS_H_
 
+/// Type representing errors which can occur during the work
+/// or the driver.
+/// Unfortunately to share this type among the code we have to introduce
+/// here somewhat specific for some part of code errors too.
 enum fat32_error_t {
   FE_OK,                        /**< no errors occured */
   FE_ERRNO,                     /**< indicates that errno specifies error */
@@ -18,7 +22,7 @@ enum fat32_error_t {
   FE_INVALID_DEV,               /**< invalid device (too small and other
 				   errors of that kind)
                                 */
-  FE_INVALID_FS			/**< invalid filesystem */
+  FE_INVALID_FS,		/**< invalid filesystem */
 };
 
 #endif /* _FS_ERRORS_H_ */
