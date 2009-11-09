@@ -32,6 +32,9 @@ struct fat32_fat_t {
                                             @link fat32_fs_open @endlink call */
 };
 
+/// type for each separate entry in FAT
+typedef uint32_t fat32_fat_entry_t;
+
 /** 
  * Initializes a structure needed to work with file allocation tables.
  * As BPB and FSInfo related functions does not allocate or deallocate memory
@@ -72,34 +75,55 @@ enum fat32_error_t
 fat32_fs_close(struct fat32_fs_t *fs);
 
 /** 
- * Returns a number of the cluster following the given in FAT.
+ * Returns a FAT entry for a given cluster number
  * 
  * @param fat FAT
- * @param cluster Value/result parameter. During the call it must contain
- *                interested cluster number. After the return from the call
- *                (if operation was successfull) the following cluster number
- *                is stored here.
+ * @param cluster Cluster number for which a FAT entry must be returned.
+ * @param entry a place to store the resulting entry
  * 
  * @return operation status
  */
 enum fat32_error_t
-fat32_fat_next_cluster(const struct fat32_fat_t *fat,
-		       uint32_t *cluster);
+fat32_fat_get_entry(const struct fat32_fat_t *fat,
+		    uint32_t cluster, fat32_fat_entry_t *entry);
 
 /** 
- * Indicates whether the cluster got by @link fat32_fat_next_cluster @endlink
- * operation actually means the end of linked list of clusters in FAT.
+ * Indicates whether cluster corresponding to the given FAT entry is the
+ * last in cluster chain.
  * 
- * @param cluster a number of cluster to check
+ * @param entry FAT entry
  * 
- * @return boolean value determining whether cluster is actually the last
+ * @return boolean value determining whether corresponding cluster is actually
+ *         the last
  */
 bool
-fat32_fat_cluster_is_null(uint32_t cluster);
+fat32_fat_entry_is_null(fat32_fat_entry_t entry);
 
 /** 
- * Indicates whether the cluster number which is stored in directory of some
- * file means that this file is empty.
+ * Indicates whether a cluster corresponding to the given FAT entry is BAD
+ * cluster.
+ * 
+ * @param entry FAT entry 
+ * 
+ * @return boolean value determining whether a cluster is BAD
+ */
+bool
+fat32_fat_entry_is_bad(fat32_fat_entry_t entry);
+
+/** 
+ * Transforms a FAT entry to the number of the next cluster in the
+ * cluster chain.
+ * 
+ * @param entry FAT entry
+ * 
+ * @return cluster number
+ */
+uint32_t
+fat32_fat_entry_to_cluster(fat32_fat_entry_t entry);
+
+/** 
+ * Indicates whether the cluster number which is stored in directory entry
+ * of some file means that this file is empty.
  * 
  * @param cluster a number of cluster to check
  * 
@@ -107,6 +131,5 @@ fat32_fat_cluster_is_null(uint32_t cluster);
  */
 bool
 fat32_fat_cluster_is_free(uint32_t cluster);
-
 
 #endif /* _FAT_H_ */
