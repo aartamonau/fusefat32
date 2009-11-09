@@ -25,7 +25,7 @@ struct fat32_fat_t {
                                             in bytes_per_sector */
   const struct fat32_bpb_t *bpb;         /**< a pointer to BPB allocated by and
                                             initialized by
-                                            @link fat32_fs_open @endlink call
+                                            fat32_fs_open() call
                                          */
   const struct fat32_fs_info_t *fs_info; /**< a pointer to FSInfo structure
                                             allocated and initialized by
@@ -47,7 +47,8 @@ typedef uint32_t fat32_fat_entry_t;
  *           @link fat32_fs_t.fs_info @endlink and
  *           @link fat32_fs_t.fs @endlink fields must have been set correctly.
  * 
- * @return operation status
+ * @retval FE_OK
+ * @retval FE_ERRNO file descriptor of device storing fs can't be dupped
  */
 enum fat32_error_t
 fat32_fat_init(struct fat32_fat_t *fat,
@@ -58,21 +59,11 @@ fat32_fat_init(struct fat32_fat_t *fat,
  * 
  * @param fat a structure to finalize
  * 
- * @return operation status
+ * @retval FE_OK
+ * @retval FE_ERRNO @em close system call returned an error
  */
 enum fat32_error_t
 fat32_fat_finalize(struct fat32_fat_t *fat);
-
-
-/** 
- * Closes filesystem created by the call of @link fat32_fs_open @endlink
- * 
- * @param fs a file system structure to close
- * 
- * @return status of performed action
- */
-enum fat32_error_t
-fat32_fs_close(struct fat32_fs_t *fs);
 
 /** 
  * Returns a FAT entry for a given cluster number
@@ -81,7 +72,11 @@ fat32_fs_close(struct fat32_fs_t *fs);
  * @param cluster Cluster number for which a FAT entry must be returned.
  * @param entry a place to store the resulting entry
  * 
- * @return operation status
+ * @retval FE_OK
+ * @retval FE_ERRNO @li @em lseek failed
+ *                  @li data can't be read from underlying device
+ *                  @li FE_INVALID_DEV - underlying device file ended
+ *                      prematurely
  */
 enum fat32_error_t
 fat32_fat_get_entry(const struct fat32_fat_t *fat,

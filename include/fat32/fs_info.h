@@ -70,8 +70,11 @@ fat32_fs_info_verbose_info(const struct fat32_fs_info_t *fs_info);
  * @param bpb BPB structure
  * @param fs_info a place to store readed data
  * 
- * @return errors are reported according to @link fat32_error_t @endlink
- *         values' descriptions
+ * @retval FE_OK
+ * @retval FE_ERRNO @li unable to @em lseek in the underlying device file
+ *                  @li unable to @em read from the underlying device file
+ * @retval FE_INVALID_DEV device file ended prematurely
+ * @retval FE_INVALID_FS FSInfo structure read is inconsistent
  */
 enum fat32_error_t
 fat32_fs_info_read(int fd, const struct fat32_bpb_t *bpb,

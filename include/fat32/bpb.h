@@ -100,8 +100,10 @@ fat32_bpb_check_validity(const struct fat32_bpb_t *bpb);
  *           be exactly befory BPB on the disk.
  * @param bpb A pointer to structure where read information must be stored.
  * 
- * @return Errors are indicated according to @link fat32_error_t @endlink
- *         values' descriptions.
+ * @retval FE_OK
+ * @retval FE_ERRNO unable to read information from underlying device file
+ * @retval FE_INVALID_DEV underlying device file ended prematurely
+ * @retval FE_INVALID_FS data in the BPB block of device is inconsistent
  */
 enum fat32_error_t
 fat32_bpb_read(int fd, struct fat32_bpb_t *bpb);

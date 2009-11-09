@@ -48,12 +48,17 @@ typedef uint32_t params_t;
 /** 
  * Opens a filesystem for future work.
  * 
- * @param path   a path to the device containing filestystem
- * @param params opening parameters (currently not used)
- * @param fs     a pointer where a pointer to resulting file system structure
- *               will be stored
- * 
- * @return status of performed operation
+ * @param      path    a path to the device containing filestystem
+ * @param      params  opening parameters (currently not used)
+ * @param      fs      a pointer where a pointer to resulting file system
+ *                     structure will be stored
+ * @retval FE_OK
+ * @retval FE_ERRNO @li memory allocation error
+ *                  @li unable to create or initialize synchronization objects
+ *                  @li unable to read/lseek/etc on device file
+ * @retval FE_NONBLOCK_DEV device is not a block device
+ * @retval FE_INVALID_DEV device ends prematurely
+ * @retval FE_INVALID_FS BPB/FSInfo on the device is inconsistent
  */
 enum fat32_error_t
 fat32_fs_open(const char *path, params_t params,
@@ -63,8 +68,9 @@ fat32_fs_open(const char *path, params_t params,
  * Closes filesystem created by the call of @link fat32_fs_open @endlink
  * 
  * @param fs a file system structure to close
- * 
- * @return status of performed action
+ *
+ * @retval FE_OK
+ * @retval FE_ERRNO close operation returned an error
  */
 enum fat32_error_t
 fat32_fs_close(struct fat32_fs_t *fs);
