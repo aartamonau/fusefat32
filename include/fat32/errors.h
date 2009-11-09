@@ -8,8 +8,8 @@
  * 
  * 
  */
-#ifndef _FS_ERRORS_H_
-#define _FS_ERRORS_H_
+#ifndef _FAT32_ERRORS_H_
+#define _FAT32_ERRORS_H_
 
 /// Type representing errors which can occur during the work
 /// or the driver.
@@ -25,4 +25,4 @@ enum fat32_error_t {
   FE_INVALID_FS,		/**< invalid filesystem */
 };
 
-#endif /* _FS_ERRORS_H_ */
+#endif /* _FAT32_ERRORS_H_ */

@@ -9,7 +9,7 @@
  */
 
 #ifndef _ERRORS_H_
-#define _ERRORS_H
+#define _ERRORS_H_
 
 /** 
  * Macro checks that the return value of expression is non-negative.
