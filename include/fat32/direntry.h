@@ -15,6 +15,7 @@
 
 #include "fat32/errors.h"
 
+/// a size of the @em name field in #fat32_direntry_t
 #define FAT32_DIRENTRY_NAME_SIZE 11
 
 /// type representing directory entry attributes

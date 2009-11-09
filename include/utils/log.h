@@ -89,7 +89,8 @@ log_message(enum log_level_t level, const char *format, ...);
  * 
  * @return 0 on success. -1 on error. Error type is indicated by @em errno.
  */
-#define log_debug(...) log_message(LOG_DEBUG, __VA_ARGS__)
+#define log_debug(format, ...)			\
+  log_message(LOG_DEBUG, format, ##__VA_ARGS__)
 
 /** 
  * Log a message of LOG_INFO importance level.
@@ -98,7 +99,8 @@ log_message(enum log_level_t level, const char *format, ...);
  * 
  * @return 0 on success. -1 on error. Error type is indicated by @em errno.
  */
-#define log_info(...) log_message(LOG_INFO, __VA_ARGS__)
+#define log_info(format, ...)			\
+  log_message(LOG_INFO, format, ##__VA_ARGS__)
 
 /** 
  * Log a message of LOG_NOTICE importance level.
@@ -107,7 +109,8 @@ log_message(enum log_level_t level, const char *format, ...);
  * 
  * @return 0 on success. -1 on error. Error type is indicated by @em errno.
  */
-#define log_notice(...) log_message(LOG_NOTICE, __VA_ARGS__)
+#define log_notice(format, ...)			\
+  log_message(LOG_NOTICE, format, ##__VA_ARGS__)
 
 /** 
  * Log a message of LOG_WARNING importance level.
@@ -116,7 +119,8 @@ log_message(enum log_level_t level, const char *format, ...);
  * 
  * @return 0 on success. -1 on error. Error type is indicated by @em errno.
  */
-#define log_warning(...) log_message(LOG_WARNING, __VA_ARGS__)
+#define log_warning(format, ...)		\
+  log_message(LOG_WARNING, format, ##__VA_ARGS__)
 
 /** 
  * Log a message of LOG_ERROR importance level.
@@ -125,7 +129,8 @@ log_message(enum log_level_t level, const char *format, ...);
  * 
  * @return 0 on success. -1 on error. Error type is indicated by @em errno.
  */
-#define log_error(...) log_message(LOG_ERROR, __VA_ARGS__)
+#define log_error(format, ...)			\
+  log_message(LOG_ERROR, format, ##__VA_ARGS__)
 
 /** 
  * Log a message of LOG_CRITICAL importance level.
@@ -134,6 +139,7 @@ log_message(enum log_level_t level, const char *format, ...);
  * 
  * @return 0 on success. -1 on error. Error type is indicated by @em errno.
  */
-#define log_critical(...) log_message(LOG_CRITICAL, __VA_ARGS__)
+#define log_critical(format, ...)		\
+  log_message(LOG_CRITICAL, format, ##__VA_ARGS__)
 
 #endif /* _LOG_H_ */

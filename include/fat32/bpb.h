@@ -20,7 +20,7 @@
 /// maximum size of cluster in bytes
 extern const uint16_t MAX_CLUSTER_SIZE;
 
-/// value of @link fat32_bpb_t.fs_version @endlink field which specifies
+/// value of #fat32_bpb_t::fs_version field which specifies
 /// that given filesystem is FAT32
 extern const uint16_t FAT32_FS_VERSION;
 

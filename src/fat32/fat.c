@@ -1,3 +1,12 @@
+/**
+ * @file   fat.c
+ * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
+ * @date   Tue Nov 10 01:08:13 2009
+ * 
+ * @brief  Implementation of functions working with file allocation tables.
+ * 
+ * 
+ */
 #include <unistd.h>
 
 #include "utils/files.h"

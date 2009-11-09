@@ -38,8 +38,7 @@ struct fat32_fs_object_t {
 
 /** 
  * Creates a file system object for the root directory of fs. After the usage
- * the object must be manually freed by @link fat32_fs_object_free @endlink
- * function call.
+ * the object must be manually freed by ::fat32_fs_object_free function call.
  * 
  * @param fs filesystem
  * 
@@ -57,6 +56,13 @@ fat32_fs_object_root_dir(const struct fat32_fs_t *fs);
 void
 fat32_fs_object_free(struct fat32_fs_object_t *fs_object);
 
+/** 
+ * Returns a number of the first cluster of file system object.
+ * 
+ * @param fs_object file system object
+ * 
+ * @return cluster number
+ */
 uint32_t
 fat32_fs_object_first_cluster(const struct fat32_fs_object_t *fs_object);
 

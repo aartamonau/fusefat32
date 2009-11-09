@@ -3,8 +3,7 @@
  * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
  * @date   Thu Oct  1 22:55:10 2009
  * 
- * @brief  Implements utility functions declared in
- * @link utils/files.h @endlink.
+ * @brief  Implements utility functions declared in utils/files.h.
  * 
  * 
  */

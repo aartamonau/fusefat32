@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <stdbool.h>
 
+/* using the latest API version */
 #define FUSE_USE_VERSION 26
 
 #include <fuse.h>
@@ -78,7 +79,7 @@ struct fusefat32_t {
  * Generates FUSE input option descriptor
  *
  * @param t option template
- * @param p member of @link fusefat32_config_t @endlink where a value for the option
+ * @param p member of #fusefat32_config_t where a value for the option
  *          must be stored
  *
  * @return option definition
@@ -186,9 +187,9 @@ main(int argc, char *argv[])
      file for logging. If @em foreground option has been chosen then
      we use @em stderr for logging. If both options has been chosen
      at the same time then we prefer @em foreground option.
-     Default importance level for logs is @link LOG_WARNING @endlink.
+     Default importance level for logs is #LOG_WARNING.
      If @em verbose flag is set then log level to use is
-     @link LOG_DEBUG @endlink.
+     #LOG_DEBUG.
   */
 
   enum log_level_t log_level = LOG_WARNING;

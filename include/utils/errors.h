@@ -22,7 +22,7 @@
 #define CHECK_NN(expr) if ((expr) < 0) return -1
 
 /** 
- * @link CHECK_NN @endlink which allows to specify your own value to return
+ * Like #CHECK_NN which allows to specify your own value to return
  * on error.
  * 
  * @param expr 

@@ -86,7 +86,7 @@ fat32_bpb_check_validity(const struct fat32_bpb_t *bpb)
 
   /* Number of sectors per cluster can be any power of two. But the result
      of multiplication of @em bytes_per_sector and @em sectors_per_cluster
-     can't exceed @link MAX_CLUSTER_SIZE @endlink (which is 32K bytes) value.
+     can't exceed #MAX_CLUSTER_SIZE (which is 32K bytes) value.
   */
   uint8_t spc      = bpb->sectors_per_cluster;
   uint32_t product = spc * bps;

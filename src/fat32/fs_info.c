@@ -17,16 +17,16 @@
 #include "utils/files.h"
 
 /// magic number that must be stored in
-/// @link fat32_fs_info_t.lead_signature @endlink
+/// #fat32_fs_info_t::lead_signature
 const uint32_t FS_INFO_LEAD_SIGNATURE   = 0x41615252;
 
 /// magic number that must be stored in
-/// @link fat32_fs_info_t.struct_signature @endlink
+/// #fat32_fs_info_t::struct_signature
 const uint32_t FS_INFO_STRUCT_SIGNATURE = 0x61417272;
 
 
 /// magic number that must be stored in
-/// @link fat32_fs_info_t.trail_signature @endlink
+/// #fat32_fs_info_t::trail_signature
 const uint32_t FS_INFO_TRAIL_SIGNATURE  = 0xaa550000;
 
 bool

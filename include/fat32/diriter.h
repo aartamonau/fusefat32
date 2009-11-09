@@ -27,6 +27,15 @@ struct fat32_diriter_t {
 				       cluster data */
 };
 
+/** 
+ * Creates a directory iterator from #fat32_fs_object_t.
+ * Asserts that @em fs_object is directory or root directory.
+ * 
+ * @param fs_object file system object
+ * 
+ * @return directory iterator
+ * @retval NULL Error occured. Error is specified by @em errno.
+ */
 struct fat32_diriter_t *
 fat32_diriter_create(const struct fat32_fs_object_t *fs_object);
 

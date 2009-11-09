@@ -31,7 +31,7 @@ struct fat32_fs_t {
                                         Assume the following invariant:
                                         if @em write_lock is not NULL then it
                                         has been correctly initialized using
-                                        @link pthread_mutex_init @endlink
+                                        @em pthread_mutex_init
                                    */
   
   uint64_t size;                   /**< size of underlying block device in
@@ -65,7 +65,7 @@ fat32_fs_open(const char *path, params_t params,
 	      struct fat32_fs_t **fs);
 
 /** 
- * Closes filesystem created by the call of @link fat32_fs_open @endlink
+ * Closes filesystem created by the call of ::fat32_fs_open
  * 
  * @param fs a file system structure to close
  *

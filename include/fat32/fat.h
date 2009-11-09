@@ -20,7 +20,7 @@ struct fat32_fs_t;
 /// structure encapsulating data needed to work with file allocation tables
 struct fat32_fat_t {
   int fd;                                /**< a duplicate of file descriptor
-                                            used in @link fat32_fs_t @endlink */
+                                            used in #fat32_fs_t */
   uint32_t bytes_per_sector_log;         /**< the number of the highest bit set
                                             in bytes_per_sector */
   const struct fat32_bpb_t *bpb;         /**< a pointer to BPB allocated by and
@@ -29,7 +29,7 @@ struct fat32_fat_t {
                                          */
   const struct fat32_fs_info_t *fs_info; /**< a pointer to FSInfo structure
                                             allocated and initialized by
-                                            @link fat32_fs_open @endlink call */
+                                            ::fat32_fs_open call */
 };
 
 /// type for each separate entry in FAT
@@ -42,10 +42,10 @@ typedef uint32_t fat32_fat_entry_t;
  * only internally.
  * 
  * @param fat a structure to initialize
- * @param fs Partially initialized @link fat32_fs_t @endlink structure.
- *           By the time of the call @link fat32_fs_t.bpb @endlink,
- *           @link fat32_fs_t.fs_info @endlink and
- *           @link fat32_fs_t.fs @endlink fields must have been set correctly.
+ * @param fs Partially initialized #fat32_fs_t structure.
+ *           By the time of the call #fat32_fs_t::bpb,
+ *           fat32_fs_t::fs_info and fat32_fs_t::fd fields must
+ *           have been set correctly.
  * 
  * @retval FE_OK
  * @retval FE_ERRNO file descriptor of device storing fs can't be dupped

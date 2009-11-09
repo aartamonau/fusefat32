@@ -5,15 +5,14 @@
  * 
  * @brief  Logging utitlity functions 
  * 
- * @link log_message @endlink that actually logs messages of course
- * locks on @link log_lock @endlink before writing something to
- * @link log_file @endlink. But there is another place for synchronization
- * in this function. It is a check of whether @link log_file @endlink has
- * non NULL value. And this check is not interlocked to not introduce locking
- * overhead when logging, for instance, disabled at all. This behavior is
- * correct only because we insist that @link log_init_from_path @enlink,
- * @link log_init_from_file @endlink and @link log_close @endlink must be
- * called when any call to @link log_message @endlink (and macros which use it)
+ * ::log_message that actually logs messages of course locks on
+ * #log_lock before writing something to #log_file. But there is
+ * another place for synchronization in this function. It is a check of
+ * whether #log_file has a non NULL value. And this check is not interlocked
+ * to not introduce locking overhead when logging, for instance, disabled at
+ * all. This behavior is correct only because we insist that
+ * ::log_init_from_path, ::log_init_from_file and ::log_close must be
+ * called when any call to ::log_message (and macros which use it)
  * is strictly impossible.
  * The same applies to the check of message's log level.
  */
@@ -34,7 +33,7 @@ static FILE *log_file = NULL;
 
 /**
  * If this variable is @em true then it means that file can
- * be closed by @link log_close @endlink call.
+ * be closed by ::log_close call.
  * 
  */
 static bool restricted;

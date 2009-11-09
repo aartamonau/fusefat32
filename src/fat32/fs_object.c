@@ -1,3 +1,12 @@
+/**
+ * @file   fs_object.c
+ * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
+ * @date   Tue Nov 10 00:52:24 2009
+ * 
+ * @brief  File system objects' functionality implementation.
+ * 
+ * 
+ */
 #include <stdlib.h>
 
 #include "fat32/fs_object.h"

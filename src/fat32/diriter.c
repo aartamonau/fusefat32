@@ -1,3 +1,12 @@
+/**
+ * @file   diriter.c
+ * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
+ * @date   Tue Nov 10 00:46:34 2009
+ * 
+ * @brief  Directory iterators implementation.
+ * 
+ * 
+ */
 #include <assert.h>
 #include <stdlib.h>
 

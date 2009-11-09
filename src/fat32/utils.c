@@ -3,9 +3,8 @@
  * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
  * @date   Sun Nov  8 00:55:12 2009
  * 
- * @brief  External definitions of inline functions from
- *         @link fat32/utils.h @endlink. Implementations of non-inline
- *         functions from the same file.
+ * @brief  External definitions of inline functions from fat32/utils.h.
+ *         Implementations of non-inline functions from the same file.
  * 
  * 
  */

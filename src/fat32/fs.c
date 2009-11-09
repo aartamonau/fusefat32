@@ -108,7 +108,7 @@ fat32_fs_open(const char *path, params_t params,
   int ret = pthread_mutex_init(lock, NULL);
   if (pthread_mutex_init(lock, NULL) != 0) {
     /* we are deallocating memory to hold the invariant described
-       at @link fat32_fs_t.write_lock @endlink
+       at #fat32_fs_t::write_lock
     */
     free(lock);
 
