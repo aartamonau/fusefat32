@@ -25,10 +25,10 @@
  * Like #CHECK_NN which allows to specify your own value to return
  * on error.
  * 
- * @param expr 
- * @param ret 
+ * @param expr expression to check
+ * @param ret a value to use in return in case of error
  * 
- * @return 
+ * @return no return value
  */
 #define CHECK_NN_RET(expr, ret) if ((expr) < 0) return (ret)
 
