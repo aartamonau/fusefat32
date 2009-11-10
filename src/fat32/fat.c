@@ -44,6 +44,7 @@ fat32_fat_finalize(struct fat32_fat_t *fat)
   return FE_OK;
 }
 
+/// a size in bytes of entry in file allocation table
 static const uint8_t  FAT32_FAT_ENTRY_SIZE = sizeof(fat32_fat_entry_t);
 
 enum fat32_error_t
@@ -77,6 +78,7 @@ fat32_fat_get_entry(const struct fat32_fat_t *fat,
   return FE_OK;
 }
 
+/// end of cluster chain mark
 static const fat32_fat_entry_t FAT32_FAT_ENTRY_EOC = 0x0ffffff8;
 bool
 fat32_fat_entry_is_null(fat32_fat_entry_t entry)
@@ -84,10 +86,14 @@ fat32_fat_entry_is_null(fat32_fat_entry_t entry)
   return entry >= FAT32_FAT_ENTRY_EOC;
 }
 
+/// mask that matches 28-bits in 32-bit fat entry which are actually are
+/// used
 static const fat32_fat_entry_t FAT32_FAT_ENTRY_MASK = 0x0fffffff;
+
+/// bad cluster fat entry mark
 static const uint32_t FAT32_FAT_ENTRY_BAD           = 0x0ffffff7;
 bool
-fat32_fat_cluster_is_bad(fat32_fat_entry_t entry)
+fat32_fat_entry_is_bad(fat32_fat_entry_t entry)
 {
   return (entry & FAT32_FAT_ENTRY_MASK) == FAT32_FAT_ENTRY_BAD;
 }
