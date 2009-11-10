@@ -4,7 +4,11 @@
  * @date   Thu Oct  1 23:37:07 2009
  * 
  * @brief  Functions for working with BPB.
- * 
+ *
+ * @todo Apparently #fat32_bpb_t structure must not be a mirror of the data
+ *       that is stored on the disk. On the contrary it must contain as its
+ *       substructure the data stored on the disk and some of the fields for
+ *       caching or something of the sort.
  * 
  */
 
@@ -16,8 +20,18 @@
 #include "utils/errors.h"
 #include "utils/log.h"
 
-const uint16_t MAX_CLUSTER_SIZE = 32 * 1024;
-const uint16_t FAT32_FS_VERSION = 0x0000;
+/// maximum possible size of a single cluster in bytes
+static const uint16_t MAX_CLUSTER_SIZE   = 32 * 1024;
+
+/// value of #fat32_bpb_t::fs_version field which specifies
+/// that given filesystem is FAT32
+static const uint16_t FAT32_FS_VERSION   = 0x0000;
+
+/// minimum valid cluster number
+static const uint32_t MIN_CLUSTER_NUMBER = 2;
+
+/// minimum number of clusters that valid FAT32 file system can contain
+static const uint32_t FAT32_MIN_CLUSTERS = 65525;
 
 int
 fat32_bpb_verbose_info(const struct fat32_bpb_t *bpb)
@@ -88,7 +102,7 @@ fat32_bpb_check_validity(const struct fat32_bpb_t *bpb)
      of multiplication of @em bytes_per_sector and @em sectors_per_cluster
      can't exceed #MAX_CLUSTER_SIZE (which is 32K bytes) value.
   */
-  uint8_t spc      = bpb->sectors_per_cluster;
+  uint8_t  spc     = bpb->sectors_per_cluster;
   uint32_t product = spc * bps;
 
   if ((spc == 0) || ((spc & (spc - 1)) != 0) || (product > MAX_CLUSTER_SIZE)) {
@@ -140,11 +154,14 @@ fat32_bpb_check_validity(const struct fat32_bpb_t *bpb)
     return false;
   }
 
-  /* root cluster number can be any valid cluster number.
-     @todo: elaborate check
-     @todo: eliminate magic number
-  */
-  if (bpb->root_cluster < 2) {
+  /* clusters count must be at leas #FAT32_MIN_CLUSTERS */
+  uint32_t clusters_count = fat32_bpb_clusters_count(bpb);
+  if (clusters_count < FAT32_MIN_CLUSTERS) {
+    return false;
+  }
+
+  /* root cluster number can be any valid cluster number */
+  if (!fat32_bpb_is_valid_cluster(bpb, bpb->root_cluster)) {
     return false;
   }
 
@@ -188,4 +205,14 @@ fat32_bpb_clusters_count(const struct fat32_bpb_t *bpb)
   uint32_t data_sectors = total - reserved - fat;
 
   return data_sectors / bpb->sectors_per_cluster;
+}
+
+bool
+fat32_bpb_is_valid_cluster(const struct fat32_bpb_t *bpb,
+			   uint32_t cluster)
+{
+  uint32_t clusters_count = fat32_bpb_clusters_count(bpb);
+
+  return (cluster >= MIN_CLUSTER_NUMBER &&
+	  cluster <= clusters_count + 1);
 }

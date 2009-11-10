@@ -17,13 +17,6 @@
 
 #include "fat32/errors.h"
 
-/// maximum size of cluster in bytes
-extern const uint16_t MAX_CLUSTER_SIZE;
-
-/// value of #fat32_bpb_t::fs_version field which specifies
-/// that given filesystem is FAT32
-extern const uint16_t FAT32_FS_VERSION;
-
 /// Structure describing all available BPB parameters
 struct fat32_bpb_t {
   uint8_t  jmp_boot[3];            /**< jump instruction to boot code */
@@ -117,5 +110,17 @@ fat32_bpb_read(int fd, struct fat32_bpb_t *bpb);
  */
 uint32_t
 fat32_bpb_clusters_count(const struct fat32_bpb_t *bpb);
+
+/** 
+ * Determines whether given cluster number is valid for this BPB.
+ *
+ * @param bpb BPB structure 
+ * @param cluster cluster number
+ * 
+ * @return boolean value showing wether cluster number is valid
+ */
+bool
+fat32_bpb_is_valid_cluster(const struct fat32_bpb_t *bpb,
+			   uint32_t cluster);
 
 #endif /* _BPB_H_ */
