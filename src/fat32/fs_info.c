@@ -62,8 +62,14 @@ fat32_fs_info_read(int fd, const struct fat32_bpb_t *bpb,
 		   struct fat32_fs_info_t *fs_info)
 {
   off_t fs_info_offset = fat32_sector_to_offset(bpb, bpb->fs_info_sector);
-  off_t old_offset     = lseek(fd, fs_info_offset, SEEK_SET);
+  off_t old_offset     = lseek(fd, 0, SEEK_CUR);
+
   if (old_offset == (off_t) -1) {
+    return FE_ERRNO;
+  }
+  
+  off_t new_offset     = lseek(fd, fs_info_offset, SEEK_SET);
+  if (new_offset != fs_info_offset) {
     return FE_ERRNO;
   }
 
