@@ -2,17 +2,14 @@
  * @file   main.c
  * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
  * @date   Tue Sep  8 20:30:41 2009
- * 
+ *
  * @brief Integrates all filesystem functionality.
  *
  * This file is the main file of filesystem. It's responsibility is
  * to read needed options and unite all other functionality in a single
  * block.
- * 
+ *
  */
-
-/* workaround allowing to build the filesystem using -std=c99 */
-#define _GNU_SOURCE
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -51,19 +48,19 @@
 
 /**
  * A structure to store mounting options
- * 
+ *
  */
 struct fusefat32_config_t {
   char *device;                 /**< a path to device to mount */
-  char *log;			/**< a path to log file */
+  char *log;      /**< a path to log file */
   bool  verbose;                /**< behave verbosely */
-  bool  foreground;		/**< run program in foreground and
-				     do all logging to @em stderr  */
+  bool  foreground;     /**< run program in foreground and
+             do all logging to @em stderr  */
 };
 
 /**
  * All data needed for program gathered in one place.
- * 
+ *
  */
 struct fusefat32_t {
   struct fusefat32_config_t config; /**< config */
@@ -88,7 +85,7 @@ struct fusefat32_t {
 
 /**
  * Key parameters of fusefat32
- * 
+ *
  */
 enum {
   KEY_VERSION,                  /**< indicates that user has acquired version
@@ -96,14 +93,14 @@ enum {
   KEY_HELP,                     /**< indicates that user has acquired program
                                    usage information */
   KEY_VERBOSE,                  /**< print verbose information while mounting */
-  KEY_FOREGROUND		/**< run program in foreground and log all
-				     messages to @em stderr */
+  KEY_FOREGROUND    /**< run program in foreground and log all
+             messages to @em stderr */
 };
 
 
 /**
  * Additional options which fusefat32 accepts
- * 
+ *
  */
 static struct fuse_opt fusefat32_options[] = {
   FUSEFAT32_OPT("dev=%s", device),
@@ -122,7 +119,7 @@ static struct fuse_opt fusefat32_options[] = {
 
 /**
  * Processes version and help keys.
- * 
+ *
  */
 static int
 fusefat32_process_options(void *data, const char *arg, int key,
@@ -152,23 +149,23 @@ fusefat32_process_options(void *data, const char *arg, int key,
   return 1;
 }
 
-/** 
+/**
  * Main function
- * 
- * @param argc 
- * @param argv 
- * 
- * @return 
+ *
+ * @param argc
+ * @param argv
+ *
+ * @return
  */
 int
 main(int argc, char *argv[])
 {
   struct fuse_args   args        = FUSE_ARGS_INIT(argc, argv);
   struct fusefat32_t fusefat32   = { .config = FUSEFAT32_CONFIG_DEFAULT,
-				     .fs     = NULL };
+             .fs     = NULL };
 
   fuse_opt_parse(&args, &fusefat32, fusefat32_options,
-		 fusefat32_process_options);
+     fusefat32_process_options);
 
   struct fusefat32_config_t *config = &fusefat32.config;
 
@@ -177,7 +174,7 @@ main(int argc, char *argv[])
   */
   if (config->device == NULL) {
     fputs(_("A device to mount must be specified (use `dev` option)\n"),
-	    stderr);
+      stderr);
 
     return EXIT_FAILURE;
   }
@@ -202,7 +199,7 @@ main(int argc, char *argv[])
     int lret = log_init_from_path(config->log, log_level);
     if (lret < 0) {
       fprintf(stderr, _("Can't initialize logging facility. Error: %s\n"),
-	      strerror(errno));
+        strerror(errno));
 
       return EXIT_FAILURE;
     } else {
@@ -216,7 +213,7 @@ main(int argc, char *argv[])
 
   enum fat32_error_t ret;
   ret = fat32_fs_open(config->device, 0,
-		      &fusefat32.fs);
+          &fusefat32.fs);
 
   if (ret == FE_OK) {
     fputs(_("OK\n"), stderr);
