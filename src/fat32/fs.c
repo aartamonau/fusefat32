@@ -2,10 +2,10 @@
  * @file   fs.c
  * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
  * @date   Thu Oct  1 22:54:25 2009
- * 
+ *
  * @brief  Implementation of functions for working with FAT32 file system.
- * 
- * 
+ *
+ *
  */
 #include <stdlib.h>
 #include <assert.h>
@@ -17,15 +17,16 @@
 #include <unistd.h>
 
 #include "fat32/fs.h"
+#include "fat32/utils.h"
 #include "utils/files.h"
 #include "utils/log.h"
 #include <stdio.h>
 
-/** 
+/**
  * Frees all resources allocated for the file system.
- * 
+ *
  * @param fs a file system structure
- * 
+ *
  * @return 0 on success, -1 otherwise
  */
 static inline int
@@ -62,7 +63,7 @@ fat32_fs_cleanup(struct fat32_fs_t* fs)
 
     if (fs->fat != NULL) {
       if (fat32_fat_finalize(fs->fat) != FE_OK) {
-	return -1;
+  return -1;
       }
       free(fs->fat);
     }
@@ -75,7 +76,7 @@ fat32_fs_cleanup(struct fat32_fs_t* fs)
 
 enum fat32_error_t
 fat32_fs_open(const char *path, params_t params,
-	      struct fat32_fs_t **result)
+        struct fat32_fs_t **result)
 {
   struct fat32_fs_t      *fs;
   struct fat32_bpb_t     *bpb;
@@ -172,7 +173,7 @@ fat32_fs_open(const char *path, params_t params,
     goto open_device_cleanup;
   }
 
-  return FE_OK;  
+  return FE_OK;
 
  open_device_cleanup:
   /* @todo make something more sensible with return value */
@@ -190,4 +191,33 @@ fat32_fs_close(struct fat32_fs_t *fs)
   } else {
     return FE_ERRNO;
   }
+}
+
+enum fat32_error_t
+fat32_fs_read_cluster(const struct fat32_fs_t *fs, void *buffer,
+                      uint32_t cluster)
+{
+  if (!fat32_bpb_is_valid_cluster(fs->bpb, cluster)) {
+    return FE_INVALID_CLUSTER;
+  }
+
+  off_t offset = fat32_cluster_to_offset(fs->bpb, cluster);
+
+  /* TODO: caching */
+  uint32_t cluster_size =
+    fs->bpb->sectors_per_cluster * fs->bpb->bytes_per_sector;
+
+  if (lseek(fs->fd, offset, SEEK_CUR) == (off_t) -1) {
+    return FE_ERRNO;
+  }
+
+  /* TODO: synchronization */
+  int nread = xread(fs->fd, buffer, cluster_size);
+  if (nread == -1) {
+    return FE_ERRNO;
+  } else if (nread < cluster_size) {
+    return FE_INVALID_DEV;
+  }
+
+  return FE_OK;
 }

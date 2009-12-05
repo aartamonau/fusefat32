@@ -2,9 +2,9 @@
  * @file   fs.h
  * @author  <aliaksiej.artamonau@gmail.com>
  * @date   Tue Sep 29 20:35:58 2009
- * 
+ *
  * @brief  Declares common function for working with filesystem.
- * 
+ *
  */
 
 
@@ -25,7 +25,7 @@
 /// filesystem descriptor
 struct fat32_fs_t {
   int              fd;             /**< file descriptor of device where
-				      filesystem is stored */
+              filesystem is stored */
 
   pthread_mutex_t *write_lock;     /**< Mutex to lock on writing.
                                         Assume the following invariant:
@@ -33,21 +33,21 @@ struct fat32_fs_t {
                                         has been correctly initialized using
                                         @em pthread_mutex_init
                                    */
-  
+
   uint64_t size;                   /**< size of underlying block device in
-				      bytes */
+              bytes */
 
   struct fat32_bpb_t     *bpb;     /**< bios parameters block */
   struct fat32_fs_info_t *fs_info; /**< FSInfo */
-  struct fat32_fat_t     *fat;	   /**< FAT-related data */
+  struct fat32_fat_t     *fat;     /**< FAT-related data */
 };
 
 /// filesystem parameters
 typedef uint32_t params_t;
 
-/** 
+/**
  * Opens a filesystem for future work.
- * 
+ *
  * @param      path    a path to the device containing filestystem
  * @param      params  opening parameters (currently not used)
  * @param      fs      a pointer where a pointer to resulting file system
@@ -62,11 +62,11 @@ typedef uint32_t params_t;
  */
 enum fat32_error_t
 fat32_fs_open(const char *path, params_t params,
-	      struct fat32_fs_t **fs);
+        struct fat32_fs_t **fs);
 
-/** 
+/**
  * Closes filesystem created by the call of ::fat32_fs_open
- * 
+ *
  * @param fs a file system structure to close
  *
  * @retval FE_OK
@@ -74,5 +74,27 @@ fat32_fs_open(const char *path, params_t params,
  */
 enum fat32_error_t
 fat32_fs_close(struct fat32_fs_t *fs);
+
+/**
+ * Reads a cluster into the buffer. Function does not restore file offset
+ * after the call.
+ *
+ * @param fs file system object
+ * @param buffer which size is greater or equal to
+ *               #fat32_bpb_t::bytes_per_sector *
+ *               #fat32_bpb_t.sectors_per_cluster
+ * @param cluster a number of cluster to read
+ *
+ *
+ * @retval FE_OK
+ * @retval FE_ERRNO
+ * @retval FE_INVALID_CLUSTER Invalid cluster number specified. This can be
+ *                            either programming error or inconsistency on
+ *                            the file system.
+ * @retval FE_INVALID_DEV     Data ends prematurely.
+ */
+enum fat32_error_t
+fat32_fs_read_cluster(const struct fat32_fs_t *fs, void *buffer,
+                      uint32_t cluster);
 
 #endif
