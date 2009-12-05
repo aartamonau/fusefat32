@@ -2,12 +2,14 @@
  * @file   fs_object.c
  * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
  * @date   Tue Nov 10 00:52:24 2009
- * 
+ *
  * @brief  File system objects' functionality implementation.
- * 
- * 
+ *
+ *
  */
+
 #include <stdlib.h>
+#include <string.h>
 
 #include "fat32/fs_object.h"
 
@@ -27,6 +29,45 @@ fat32_fs_object_root_dir(const struct fat32_fs_t *fs)
   fs_object->fs       = fs;
 
   return fs_object;
+}
+
+struct fat32_fs_object_t *
+fat32_fs_object_direntry(const struct fat32_fs_t       *fs,
+                         const struct fat32_direntry_t *direntry,
+                         const char *name)
+{
+  struct fat32_fs_object_t *fs_object;
+
+  fs_object = malloc(sizeof(struct fat32_fs_object_t));
+  if (fs_object == NULL) {
+    return NULL;
+  }
+
+  fs_object->type     = FAT32_FS_OBJECT_DIR;
+  fs_object->name     = NULL;
+  fs_object->direntry = NULL;
+  fs_object->fs       = fs;
+
+  fs_object->name     = strdup((char *) direntry->name);
+  if (fs_object->name == NULL) {
+    goto cleanup;
+  }
+
+  fs_object->direntry = malloc(sizeof(struct fat32_direntry_t));
+  if (fs_object->direntry == NULL) {
+    goto cleanup;
+  }
+
+  return fs_object;
+
+cleanup:
+  if (fs_object->name != NULL) {
+    free(fs_object->name);
+  }
+
+  free(fs_object);
+
+  return NULL;
 }
 
 void
