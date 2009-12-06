@@ -59,8 +59,8 @@ suitable_direntry(const struct fat32_direntry_t *direntry)
 }
 
 enum fat32_error_t
-fat32_diriter_next(struct fat32_fs_object_t **fs_object,
-                   struct fat32_diriter_t    *diriter)
+fat32_diriter_next(struct fat32_diriter_t    *diriter,
+                   struct fat32_fs_object_t **fs_object)
 {
   assert( diriter->offset < diriter->cluster_size );
   assert( diriter->cluster != 0 );
@@ -127,4 +127,10 @@ fat32_diriter_next(struct fat32_fs_object_t **fs_object,
   free(direntry_name);
 
   return FE_OK;
+}
+
+void
+fat32_diriter_free(struct fat32_diriter_t *diriter)
+{
+  free(diriter);
 }

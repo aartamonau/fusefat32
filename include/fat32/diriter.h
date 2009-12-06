@@ -26,9 +26,6 @@ struct fat32_diriter_t {
                                             nothing to iterate. */
   uint32_t                 offset;       /**< Offset of the next item in cluster
                                             to iterate. */
-  void                    *buffer;       /**< buffer storing currently iterade
-                                            cluster data */
-
   uint32_t                 cluster_size; /**< cached size of the cluster
                                             on the file system */
 };
@@ -56,7 +53,15 @@ fat32_diriter_create(const struct fat32_fs_object_t *fs_object);
  * @retval FE_INVALID_DEV Device ended prematurely.
  */
 enum fat32_error_t
-fat32_diriter_next(struct fat32_fs_object_t **fs_object,
-                   struct fat32_diriter_t    *diriter);
+fat32_diriter_next(struct fat32_diriter_t    *diriter,
+                   struct fat32_fs_object_t **fs_object);
+
+/**
+ * Frees resources hold by directory iterator.
+ *
+ * @param diriter Directory iterator to free.
+ */
+void
+fat32_diriter_free(struct fat32_diriter_t *diriter);
 
 #endif /* _DIRITER_H_ */

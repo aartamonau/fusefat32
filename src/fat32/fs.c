@@ -9,6 +9,8 @@
  */
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
+#include <stdio.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -18,9 +20,10 @@
 
 #include "fat32/fs.h"
 #include "fat32/utils.h"
+#include "fat32/diriter.h"
+#include "fat32/fs_object.h"
 #include "utils/files.h"
 #include "utils/log.h"
-#include <stdio.h>
 
 /**
  * Frees all resources allocated for the file system.
@@ -220,4 +223,79 @@ fat32_fs_read_cluster(const struct fat32_fs_t *fs, void *buffer,
   }
 
   return FE_OK;
+}
+
+enum fat32_error_t
+fat32_fs_get_object(const struct fat32_fs_t *fs,
+                    const char *path,
+                    struct fat32_fs_object_t **fs_object)
+{
+  char *path_copy = NULL;
+  char *saveptr;
+  char *token;
+  char *str;
+  enum fat32_error_t error = FE_ERRNO;
+  struct fat32_fs_object_t *parent = NULL;
+
+  path_copy = strdup(path);
+  if (path_copy == NULL) {
+    goto cleanup;
+  }
+
+  str = path_copy;
+  token = strtok_r(str, "/", &saveptr);
+
+  parent = fat32_fs_object_root_dir(fs);
+  if (*fs_object == NULL) {
+    goto cleanup;
+  }
+
+  while (token != NULL) {
+    struct fat32_diriter_t *diriter = fat32_diriter_create(parent);
+
+    int ret;
+    struct fat32_fs_object_t *child;
+
+    while (true) {
+      ret = fat32_diriter_next(diriter, &child);
+      if (ret == FE_OK) {
+
+        if (child == NULL) {
+          /* wrong path */
+          *fs_object = NULL;
+          fat32_diriter_free(diriter);
+
+          return FE_OK;
+        }
+
+        if (strcmp(token, child->name) == 0) {
+          parent = child;
+          break;
+        }
+
+      } else {
+        error = ret;
+        fat32_diriter_free(diriter);
+        goto cleanup;
+      }
+    }
+
+    fat32_diriter_free(diriter);
+
+    token = strtok_r(NULL, "/", &saveptr);
+  }
+
+  *fs_object = parent;
+  return FE_OK;
+
+cleanup:
+  if (path_copy != NULL) {
+    free(path_copy);
+  }
+
+  if (parent != NULL) {
+    fat32_fs_object_free(parent);
+  }
+
+  return error;
 }
