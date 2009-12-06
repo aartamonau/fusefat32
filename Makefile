@@ -16,8 +16,14 @@ FUSE_CFLAGS    := $(shell pkg-config fuse --cflags-only-other)
 FUSE_CPPFLAGS  := $(shell pkg-config fuse --cflags-only-I)
 FUSE_LIBS      := $(shell pkg-config fuse --libs)
 
-CFLAGS   := --std=gnu99 -O2 -funroll-loops -Wall -Winline $(FUSE_CFLAGS)
-CPPFLAGS := -iquote$(INCLUDE_DIR) $(FUSE_CPPFLAGS)
+CFLAGS   := --std=gnu99 -Wall -Winline $(FUSE_CFLAGS)
+ifdef DEBUG
+	CFLAGS += -ggdb -g
+else
+	CFLAGS += -O2 -funroll-loops
+endif
+CPPFLAGS := -iquote$(INCLUDE_DIR) $(FUSE_CPPFLAGS) \
+            -DFUSE_USE_VERSION=26
 LIBS     := $(FUSE_LIBS)
 
 SOURCES := $(shell find $(SRC_DIR) -name *.c -printf "%f\n")
