@@ -19,14 +19,15 @@
 
 /// directory iterator structure
 struct fat32_diriter_t {
-  const struct fat32_fs_t *fs; /**< file system owning iterated directory */
-  uint32_t                 cluster; /**< Currently iterated cluster number.
-                                     Zero value indicates that there is nothing
-                                     to iterate. */
-  uint32_t                 offset;  /**< Offset of the next item in cluster to
-                                       iterate. */
-  void                    *buffer;  /**< buffer storing currently iterade
-                                       cluster data */
+  const struct fat32_fs_t *fs;           /**< file system owning iterated
+                                            directory */
+  uint32_t                 cluster;      /**< Currently iterated cluster number.
+                                            Zero value indicates that there is
+                                            nothing to iterate. */
+  uint32_t                 offset;       /**< Offset of the next item in cluster
+                                            to iterate. */
+  void                    *buffer;       /**< buffer storing currently iterade
+                                            cluster data */
 
   uint32_t                 cluster_size; /**< cached size of the cluster
                                             on the file system */

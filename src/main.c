@@ -52,10 +52,10 @@
  */
 struct fusefat32_config_t {
   char *device;                 /**< a path to device to mount */
-  char *log;      /**< a path to log file */
+  char *log;                    /**< a path to log file */
   bool  verbose;                /**< behave verbosely */
-  bool  foreground;     /**< run program in foreground and
-             do all logging to @em stderr  */
+  bool  foreground;             /**< run program in foreground and
+                                   do all logging to @em stderr  */
 };
 
 /**
@@ -93,8 +93,8 @@ enum {
   KEY_HELP,                     /**< indicates that user has acquired program
                                    usage information */
   KEY_VERBOSE,                  /**< print verbose information while mounting */
-  KEY_FOREGROUND    /**< run program in foreground and log all
-             messages to @em stderr */
+  KEY_FOREGROUND                /**< run program in foreground and log all
+                                   messages to @em stderr */
 };
 
 

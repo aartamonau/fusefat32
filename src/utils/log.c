@@ -2,9 +2,9 @@
  * @file   log.c
  * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
  * @date   Sat Oct  3 22:40:38 2009
- * 
- * @brief  Logging utitlity functions 
- * 
+ *
+ * @brief  Logging utitlity functions
+ *
  * ::log_message that actually logs messages of course locks on
  * #log_lock before writing something to #log_file. But there is
  * another place for synchronization in this function. It is a check of
@@ -25,7 +25,7 @@
 
 #include "utils/log.h"
 
-/// a mutex to lock on when writing messages 
+/// a mutex to lock on when writing messages
 static pthread_mutex_t log_lock = PTHREAD_MUTEX_INITIALIZER;
 
 /// FILE object to which messages are sent
@@ -34,7 +34,7 @@ static FILE *log_file = NULL;
 /**
  * If this variable is @em true then it means that file can
  * be closed by ::log_close call.
- * 
+ *
  */
 static bool restricted;
 
@@ -44,13 +44,13 @@ static enum log_level_t log_level;
 /// defines the messages that are displayed before logged text for
 /// each log level
 static const char *LEVEL_MESSAGES [] = { [LOG_DEBUG]    = "DEBUG",
-					 [LOG_INFO]     = "INFO",
-					 [LOG_NOTICE]   = "NOTICE",
-					 [LOG_WARNING]  = "WARNING",
-					 [LOG_ERROR]    = "LOG_WARNING",
-					 [LOG_CRITICAL] = "CRITICAL" };
-					 
-					 
+                                         [LOG_INFO]     = "INFO",
+                                         [LOG_NOTICE]   = "NOTICE",
+                                         [LOG_WARNING]  = "WARNING",
+                                         [LOG_ERROR]    = "LOG_WARNING",
+                                         [LOG_CRITICAL] = "CRITICAL" };
+
+
 
 void
 log_init_from_file(FILE *file, enum log_level_t level)
@@ -81,7 +81,7 @@ log_close(void)
   if (log_file != NULL) {
     if (restricted) {
       if (fclose(log_file) != 0) {
-	return -1;
+  return -1;
       }
     }
   }

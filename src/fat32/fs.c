@@ -76,7 +76,7 @@ fat32_fs_cleanup(struct fat32_fs_t* fs)
 
 enum fat32_error_t
 fat32_fs_open(const char *path, params_t params,
-        struct fat32_fs_t **result)
+              struct fat32_fs_t **result)
 {
   struct fat32_fs_t      *fs;
   struct fat32_bpb_t     *bpb;

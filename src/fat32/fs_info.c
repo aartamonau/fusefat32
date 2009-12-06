@@ -2,9 +2,9 @@
  * @file   fs_info.c
  * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
  * @date   Sat Nov  7 16:56:54 2009
- * 
+ *
  * @brief FSInfo related functions.
- * 
+ *
  */
 
 #include <unistd.h>
@@ -44,22 +44,22 @@ fat32_fs_info_verbose_info(const struct fat32_fs_info_t *fs_info)
   CHECK_NN( log_debug("FSInfo verbose info: ") );
 
   CHECK_NN( log_debug("\tLead signature: %#" PRIx32,
-		      fs_info->lead_signature) );
+                      fs_info->lead_signature) );
   CHECK_NN( log_debug("\tStruct signature: %#" PRIx32,
-		      fs_info->struct_signature) );
+                      fs_info->struct_signature) );
   CHECK_NN( log_debug("\tTrail signature: %#" PRIx32,
-		      fs_info->trail_signature) );
+                      fs_info->trail_signature) );
   CHECK_NN( log_debug("\tLast known free cluster: %#" PRIu32,
-		      fs_info->last_free_cluster) );
+                      fs_info->last_free_cluster) );
   CHECK_NN( log_debug("\tFree cluster hint: %#" PRIu32,
-		      fs_info->free_cluster_hint) );
+                      fs_info->free_cluster_hint) );
 
   return 0;
 }
 
 enum fat32_error_t
 fat32_fs_info_read(int fd, const struct fat32_bpb_t *bpb,
-		   struct fat32_fs_info_t *fs_info)
+                   struct fat32_fs_info_t *fs_info)
 {
   off_t fs_info_offset = fat32_sector_to_offset(bpb, bpb->fs_info_sector);
   off_t old_offset     = lseek(fd, 0, SEEK_CUR);
@@ -67,7 +67,7 @@ fat32_fs_info_read(int fd, const struct fat32_bpb_t *bpb,
   if (old_offset == (off_t) -1) {
     return FE_ERRNO;
   }
-  
+
   off_t new_offset     = lseek(fd, fs_info_offset, SEEK_SET);
   if (new_offset != fs_info_offset) {
     return FE_ERRNO;

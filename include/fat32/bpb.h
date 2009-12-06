@@ -2,10 +2,10 @@
  * @file   bpb.h
  * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
  * @date   Wed Sep  9 12:25:17 2009
- * 
+ *
  * @brief  Defines data structures describing FAT32 boot sector and
  * bios parameters block.
- * 
+ *
  */
 #ifndef _BPB_H_
 #define _BPB_H_
@@ -62,11 +62,11 @@ struct fat32_bpb_t {
   uint8_t  fs_type[8];             /**<  filesystem type */
 } __attribute__((packed));
 
-/** 
+/**
  * Prints out verbose information about BPB to specified file.
- * 
+ *
  * @param bpb BPB structure
- * 
+ *
  * @return Upon success zero is returned. Otherwise negative value is
  * returned and error is indicated in errno.
  */
@@ -74,25 +74,25 @@ int
 fat32_bpb_verbose_info(const struct fat32_bpb_t *bpb);
 
 
-/** 
+/**
  * Checks whether a bpb structure is a correct FAT32 BPB
- * 
+ *
  * @param bpb a structure to check
- * 
+ *
  * @return @em true if correct. @em false otherwise.
  */
 bool
 fat32_bpb_check_validity(const struct fat32_bpb_t *bpb);
 
-/** 
+/**
  * Reads BPB structure from file and validates it.
- * 
+ *
  * @param fd File descriptor used to read BPB. As this function
  *           is assumed to be used only once during driver initialization
  *           so we do not do any @em lseek and require for file offset to
  *           be exactly befory BPB on the disk.
  * @param bpb A pointer to structure where read information must be stored.
- * 
+ *
  * @retval FE_OK
  * @retval FE_ERRNO unable to read information from underlying device file
  * @retval FE_INVALID_DEV underlying device file ended prematurely
@@ -101,26 +101,26 @@ fat32_bpb_check_validity(const struct fat32_bpb_t *bpb);
 enum fat32_error_t
 fat32_bpb_read(int fd, struct fat32_bpb_t *bpb);
 
-/** 
+/**
  * Calculates the number of clusters on the file system.
- * 
+ *
  * @param bpb BPB of the file system
- * 
+ *
  * @return number of clusters
  */
 uint32_t
 fat32_bpb_clusters_count(const struct fat32_bpb_t *bpb);
 
-/** 
+/**
  * Determines whether given cluster number is valid for this BPB.
  *
- * @param bpb BPB structure 
+ * @param bpb BPB structure
  * @param cluster cluster number
- * 
+ *
  * @return boolean value showing wether cluster number is valid
  */
 bool
 fat32_bpb_is_valid_cluster(const struct fat32_bpb_t *bpb,
-			   uint32_t cluster);
+         uint32_t cluster);
 
 #endif /* _BPB_H_ */

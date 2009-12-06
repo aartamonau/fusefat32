@@ -25,7 +25,7 @@
 /// filesystem descriptor
 struct fat32_fs_t {
   int              fd;             /**< file descriptor of device where
-              filesystem is stored */
+                                      filesystem is stored */
 
   pthread_mutex_t *write_lock;     /**< Mutex to lock on writing.
                                         Assume the following invariant:
@@ -35,7 +35,7 @@ struct fat32_fs_t {
                                    */
 
   uint64_t size;                   /**< size of underlying block device in
-              bytes */
+                                      bytes */
 
   struct fat32_bpb_t     *bpb;     /**< bios parameters block */
   struct fat32_fs_info_t *fs_info; /**< FSInfo */

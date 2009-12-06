@@ -2,14 +2,14 @@
  * @file   bpb.c
  * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
  * @date   Thu Oct  1 23:37:07 2009
- * 
+ *
  * @brief  Functions for working with BPB.
  *
  * @todo Apparently #fat32_bpb_t structure must not be a mirror of the data
  *       that is stored on the disk. On the contrary it must contain as its
  *       substructure the data stored on the disk and some of the fields for
  *       caching or something of the sort.
- * 
+ *
  */
 
 #include <stdio.h>
@@ -39,37 +39,37 @@ fat32_bpb_verbose_info(const struct fat32_bpb_t *bpb)
   CHECK_NN( log_debug("BPB verbose info: ") );
 
   CHECK_NN( log_debug("\tBytes per sector: %" PRIu16,
-		      bpb->bytes_per_sector) );
+                      bpb->bytes_per_sector) );
   CHECK_NN( log_debug("\tSectors per cluster: %" PRIu8,
-		      bpb->sectors_per_cluster) );
+                      bpb->sectors_per_cluster) );
   CHECK_NN( log_debug("\tReserved sectors: %" PRIu16,
-		      bpb->reserved_sectors_count) );
+                      bpb->reserved_sectors_count) );
   CHECK_NN( log_debug("\tNumber of FATs: %" PRIu8,
-		      bpb->fats_count) );
+                      bpb->fats_count) );
   CHECK_NN( log_debug("\tNumber of root entries: %" PRIu16,
-		      bpb->root_entries_count) );
+                      bpb->root_entries_count) );
 
   CHECK_NN( log_debug("\tMedia type: %#" PRIx8,
-		      bpb->media_type) );
+                      bpb->media_type) );
 
   CHECK_NN( log_debug("\tSectors per track: %" PRIu16,
-		      bpb->sectors_per_track) );
+                      bpb->sectors_per_track) );
   CHECK_NN( log_debug("\tHeads: %" PRIu16,
-		      bpb->heads_number) );
+                      bpb->heads_number) );
   CHECK_NN( log_debug("\tHidden sectors: %" PRIu32,
-		      bpb->hidden_sectors_count) );
+                      bpb->hidden_sectors_count) );
   CHECK_NN( log_debug("\tTotal sectors: %" PRIu32,
-		      bpb->total_sectors_count) );
+                      bpb->total_sectors_count) );
 
   CHECK_NN( log_debug("\tFat size: %" PRIu32,
-		      bpb->fat_size) );
+                      bpb->fat_size) );
   CHECK_NN( log_debug("\tRoot cluster: %" PRIu32,
-		      bpb->root_cluster) );
+                      bpb->root_cluster) );
   CHECK_NN( log_debug("\tFSInfo sector: %" PRIu32,
-		      bpb->fs_info_sector) );
+                      bpb->fs_info_sector) );
 
   CHECK_NN( log_debug("\tBoot signature: %#" PRIx8,
-		      bpb->boot_signature) );
+                      bpb->boot_signature) );
 
   return 0;
 }
@@ -209,10 +209,10 @@ fat32_bpb_clusters_count(const struct fat32_bpb_t *bpb)
 
 bool
 fat32_bpb_is_valid_cluster(const struct fat32_bpb_t *bpb,
-			   uint32_t cluster)
+                           uint32_t cluster)
 {
   uint32_t clusters_count = fat32_bpb_clusters_count(bpb);
 
   return (cluster >= MIN_CLUSTER_NUMBER &&
-	  cluster <= clusters_count + 1);
+    cluster <= clusters_count + 1);
 }

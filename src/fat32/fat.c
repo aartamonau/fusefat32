@@ -2,10 +2,10 @@
  * @file   fat.c
  * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
  * @date   Tue Nov 10 01:08:13 2009
- * 
+ *
  * @brief  Implementation of functions working with file allocation tables.
- * 
- * 
+ *
+ *
  */
 #include <unistd.h>
 
@@ -17,7 +17,7 @@
 
 enum fat32_error_t
 fat32_fat_init(struct fat32_fat_t *fat,
-	       const struct fat32_fs_t *fs)
+               const struct fat32_fs_t *fs)
 {
   int fd = dup(fs->fd);
   if (fd < 0) {
@@ -49,7 +49,7 @@ static const uint8_t  FAT32_FAT_ENTRY_SIZE = sizeof(fat32_fat_entry_t);
 
 enum fat32_error_t
 fat32_fat_get_entry(const struct fat32_fat_t *fat,
-		    uint32_t cluster, fat32_fat_entry_t *entry)
+                    uint32_t cluster, fat32_fat_entry_t *entry)
 {
   /* an offset of the entry in a FAT corresponding to @em cluster */
   uint32_t entry_fat_offset    = cluster * FAT32_FAT_ENTRY_SIZE;
@@ -58,14 +58,14 @@ fat32_fat_get_entry(const struct fat32_fat_t *fat,
   uint32_t entry_sector_offset = entry_fat_offset % fat->bpb->bytes_per_sector;
 
   off_t file_offset = fat32_sector_offset_to_offset(fat->bpb,
-						    entry_sector,
-						    entry_sector_offset);
+                entry_sector,
+                entry_sector_offset);
 
   off_t ret = lseek(fat->fd, file_offset, SEEK_SET);
   if (ret < (off_t) 0) {
     return FE_ERRNO;
   }
-		    
+
   ssize_t nread = xread(fat->fd, entry, FAT32_FAT_ENTRY_SIZE);
   if (nread >= 0) {
     if (nread < FAT32_FAT_ENTRY_SIZE) {
@@ -109,5 +109,3 @@ fat32_fat_cluster_is_free(uint32_t cluster)
 {
   return cluster == 0;
 }
-
-

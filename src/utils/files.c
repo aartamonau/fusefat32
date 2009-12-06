@@ -2,10 +2,10 @@
  * @file   files.c
  * @author Aliaksiej Artamonaŭ <aliaksiej.artamonau@gmail.com>
  * @date   Thu Oct  1 22:55:10 2009
- * 
+ *
  * @brief  Implements utility functions declared in utils/files.h.
- * 
- * 
+ *
+ *
  */
 
 #include <stdbool.h>
@@ -48,7 +48,7 @@ xopen(const char *path, int oflag, ...)
       return ret;
     }
   }
-    
+
 }
 
 int
