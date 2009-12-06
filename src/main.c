@@ -27,6 +27,8 @@
 
 #include "i18n.h"
 
+#include "context.h"
+
 #include "fat32/fs.h"
 #include "utils/errors.h"
 #include "utils/log.h"
@@ -44,44 +46,6 @@
                           "\n"                                   \
                           "fusefat32 options:\n"                 \
                           "    -o dev=STRING    a path to device to mount\n")
-
-
-/**
- * A structure to store mounting options
- *
- */
-struct fusefat32_config_t {
-  char *device;                 /**< a path to device to mount */
-  char *log;                    /**< a path to log file */
-  bool  verbose;                /**< behave verbosely */
-  bool  foreground;             /**< run program in foreground and
-                                   do all logging to @em stderr  */
-};
-
-/**
- * All data needed for program gathered in one place.
- *
- */
-struct fusefat32_t {
-  struct fusefat32_config_t config; /**< config */
-  struct fat32_fs_t *fs;            /**< filesytstem */
-};
-
-
-/// default fusefat32 config
-#define FUSEFAT32_CONFIG_DEFAULT { .device  = NULL, \
-                                   .verbose = false }
-
-/**
- * Generates FUSE input option descriptor
- *
- * @param t option template
- * @param p member of #fusefat32_config_t where a value for the option
- *          must be stored
- *
- * @return option definition
- */
-#define FUSEFAT32_OPT(t, p) { t, offsetof(struct fusefat32_config_t, p), 0}
 
 /**
  * Key parameters of fusefat32
@@ -125,8 +89,9 @@ static int
 fusefat32_process_options(void *data, const char *arg, int key,
                           struct fuse_args *outargs)
 {
-  struct fusefat32_t        *fusefat32 = (struct fusefat32_t *) data;
-  struct fusefat32_config_t *config    = &fusefat32->config;
+  struct fusefat32_context_t *fusefat32 =
+    (struct fusefat32_context_t *) data;
+  struct fusefat32_config_t  *config    = &fusefat32->config;
 
   switch (key) {
   case KEY_VERSION:
@@ -160,12 +125,12 @@ fusefat32_process_options(void *data, const char *arg, int key,
 int
 main(int argc, char *argv[])
 {
-  struct fuse_args   args        = FUSE_ARGS_INIT(argc, argv);
-  struct fusefat32_t fusefat32   = { .config = FUSEFAT32_CONFIG_DEFAULT,
-             .fs     = NULL };
+  struct fuse_args           args        = FUSE_ARGS_INIT(argc, argv);
+  struct fusefat32_context_t fusefat32   = { .config = FUSEFAT32_CONFIG_DEFAULT,
+                                             .fs     = NULL };
 
   fuse_opt_parse(&args, &fusefat32, fusefat32_options,
-     fusefat32_process_options);
+                 fusefat32_process_options);
 
   struct fusefat32_config_t *config = &fusefat32.config;
 
@@ -199,7 +164,7 @@ main(int argc, char *argv[])
     int lret = log_init_from_path(config->log, log_level);
     if (lret < 0) {
       fprintf(stderr, _("Can't initialize logging facility. Error: %s\n"),
-        strerror(errno));
+              strerror(errno));
 
       return EXIT_FAILURE;
     } else {
@@ -213,7 +178,7 @@ main(int argc, char *argv[])
 
   enum fat32_error_t ret;
   ret = fat32_fs_open(config->device, 0,
-          &fusefat32.fs);
+                      &fusefat32.fs);
 
   if (ret == FE_OK) {
     fputs(_("OK\n"), stderr);
