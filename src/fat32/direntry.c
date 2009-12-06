@@ -8,10 +8,10 @@
  *
  */
 
-#define EXTERN_INLINE_DEFINITIONS
-
+#include <stdlib.h>
 #include <string.h>
 
+#define EXTERN_INLINE_DEFINITIONS
 #include "fat32/direntry.h"
 
 bool

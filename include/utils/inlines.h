@@ -11,14 +11,12 @@
  *
  *
  */
-#ifndef _INLINES_H_
-#define _INLINES_H_
+/* IMPORTANT: this header MUST not have inclusion guard */
 
 /// macro which must be used instead @em inline keyword
+#undef INLINE
 #ifndef EXTERN_INLINE_DEFINITIONS
   #define INLINE inline
 #else
   #define INLINE extern
 #endif
-
-#endif /* _INLINES_H_ */
