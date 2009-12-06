@@ -19,8 +19,8 @@
 #include <assert.h>
 #include <stdbool.h>
 
-/* using the latest API version */
-#define FUSE_USE_VERSION 26
+/* /\* using the latest API version *\/ */
+/* #define FUSE_USE_VERSION 26 */
 
 #include <fuse.h>
 #include <fuse_opt.h>
@@ -28,6 +28,7 @@
 #include "i18n.h"
 
 #include "context.h"
+#include "operations.h"
 
 #include "fat32/fs.h"
 #include "utils/errors.h"
@@ -104,10 +105,14 @@ fusefat32_process_options(void *data, const char *arg, int key,
     exit(EXIT_SUCCESS);
   case KEY_VERBOSE:
     config->verbose = true;
-    break;
+
+    /* discard option */
+    return 0;
   case KEY_FOREGROUND:
     config->foreground = true;
-    break;
+
+    /* discard option */
+    return 0;
   }
 
   /* keep option */
@@ -128,6 +133,10 @@ main(int argc, char *argv[])
   struct fuse_args           args        = FUSE_ARGS_INIT(argc, argv);
   struct fusefat32_context_t fusefat32   = { .config = FUSEFAT32_CONFIG_DEFAULT,
                                              .fs     = NULL };
+  bool logging_used                      = false;
+  int  return_code                       = EXIT_FAILURE;
+
+
 
   fuse_opt_parse(&args, &fusefat32, fusefat32_options,
                  fusefat32_process_options);
@@ -141,7 +150,7 @@ main(int argc, char *argv[])
     fputs(_("A device to mount must be specified (use `dev` option)\n"),
       stderr);
 
-    return EXIT_FAILURE;
+    goto main_cleanup;
   }
 
   /* Initializing logging.
@@ -159,14 +168,14 @@ main(int argc, char *argv[])
     log_level = LOG_DEBUG;
   }
 
-  bool logging_used = false;
   if (config->log != NULL && !config->foreground) {
     int lret = log_init_from_path(config->log, log_level);
     if (lret < 0) {
+      // @em strerror function is used only in the main thread
       fprintf(stderr, _("Can't initialize logging facility. Error: %s\n"),
               strerror(errno));
 
-      return EXIT_FAILURE;
+      goto main_cleanup;
     } else {
       logging_used = true;
     }
@@ -176,25 +185,26 @@ main(int argc, char *argv[])
   } /* otherwise no logging required */
 
 
+  log_info(_("Opening file system..."));
+
   enum fat32_error_t ret;
   ret = fat32_fs_open(config->device, 0,
                       &fusefat32.fs);
 
   if (ret == FE_OK) {
-    fputs(_("OK\n"), stderr);
+    log_info(_("File system has been opened successfully."));
   } else {
-    fputs(_("ERROR\n"), stderr);
+    log_error(_("Error occured while opening file system."));
 
     if (ret == FE_ERRNO) {
-      fprintf(stderr, "%s\n", strerror(errno));
+      log_error(_("Error description: %s"), strerror(errno));
     } else {
-      fprintf(stderr, "errorcode: %d\n", ret);
+      log_error(_("Can't get error description. Error code is %d"), ret);
     }
 
-    return EXIT_FAILURE;
+    goto main_cleanup;
   }
 
-  int return_code = EXIT_SUCCESS;
   if (fat32_bpb_verbose_info(fusefat32.fs->bpb) < 0) {
     goto main_cleanup;
   }
@@ -203,13 +213,27 @@ main(int argc, char *argv[])
     goto main_cleanup;
   }
 
-  if (fat32_fs_close(fusefat32.fs) < 0) {
+  log_info(_("Starting main FUSE loop..."));
+  int fret = fuse_main(args.argc, args.argv, &fusefat32_operations, &fusefat32);
+
+  if (fret != 0) {
+    log_error(_("Unable to start FUSE loop: %s"), strerror(errno));
     goto main_cleanup;
   }
 
-  return EXIT_SUCCESS;
+  return_code = EXIT_SUCCESS;
 
  main_cleanup:
+  log_info(_("Freeing acquired resources..."));
+
+  fuse_opt_free_args(&args);
+
+  if (fusefat32.fs != NULL) {
+    if (fat32_fs_close(fusefat32.fs) < 0) {
+      log_error(_("Can't close filesystem correctly: %s"), strerror(errno));
+    }
+  }
+
   if (logging_used) {
     log_close();
   }

@@ -47,29 +47,32 @@ fat32_fs_object_direntry(const struct fat32_fs_t       *fs,
     return NULL;
   }
 
-  fs_object->type     = FAT32_FS_OBJECT_DIR;
+  if (fat32_direntry_is_directory(direntry)) {
+    fs_object->type   = FAT32_FS_OBJECT_DIR;
+  } else {
+    fs_object->type   = FAT32_FS_OBJECT_FILE;
+  }
+
   fs_object->name     = NULL;
   fs_object->direntry = NULL;
   fs_object->fs       = fs;
 
-  fs_object->name     = strdup((char *) direntry->name);
+  fs_object->name     = strdup(name);
   if (fs_object->name == NULL) {
     goto cleanup;
   }
 
   fs_object->direntry = malloc(sizeof(struct fat32_direntry_t));
+
   if (fs_object->direntry == NULL) {
     goto cleanup;
   }
+  memcpy(fs_object->direntry, direntry, sizeof(struct fat32_direntry_t));
 
   return fs_object;
 
 cleanup:
-  if (fs_object->name != NULL) {
-    free(fs_object->name);
-  }
-
-  free(fs_object);
+  fat32_fs_object_free(fs_object);
 
   return NULL;
 }
@@ -79,6 +82,10 @@ fat32_fs_object_free(struct fat32_fs_object_t *fs_object)
 {
   if (fs_object->name != NULL) {
     free(fs_object->name);
+  }
+
+  if (fs_object->direntry != NULL) {
+    free(fs_object->direntry);
   }
 
   free(fs_object);

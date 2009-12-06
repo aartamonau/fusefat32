@@ -120,6 +120,12 @@ log_message(enum log_level_t level, const char *format, ...)
       goto log_message_unlock;
     }
 
+    ioret = fflush(log_file);
+    if (ioret == EOF) {
+      result = -1;
+      goto log_message_unlock;
+    }
+
     ioret = fputs("\n", log_file);
     if (ioret < 0) {
       result = -1;

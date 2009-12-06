@@ -52,6 +52,7 @@ fat32_direntry_short_name(const struct fat32_direntry_t *direntry)
   for (int i = 0; i < FAT32_DIRENTRY_BASE_NAME_SIZE; i++, p--) {
     if (*p != SPACE) {
       base_name_size += FAT32_DIRENTRY_BASE_NAME_SIZE - i;
+      break;
     }
   }
 

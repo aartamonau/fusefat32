@@ -23,7 +23,6 @@
 #include "fat32/diriter.h"
 #include "fat32/fs_object.h"
 #include "utils/files.h"
-#include "utils/log.h"
 
 /**
  * Frees all resources allocated for the file system.
@@ -234,8 +233,9 @@ fat32_fs_get_object(const struct fat32_fs_t *fs,
   char *saveptr;
   char *token;
   char *str;
-  enum fat32_error_t error = FE_ERRNO;
-  struct fat32_fs_object_t *parent = NULL;
+  enum fat32_error_t return_code = FE_ERRNO;
+  struct fat32_fs_object_t *parent  = NULL;
+  struct fat32_diriter_t   *diriter = NULL;
 
   path_copy = strdup(path);
   if (path_copy == NULL) {
@@ -246,12 +246,16 @@ fat32_fs_get_object(const struct fat32_fs_t *fs,
   token = strtok_r(str, "/", &saveptr);
 
   parent = fat32_fs_object_root_dir(fs);
-  if (*fs_object == NULL) {
+  if (parent == NULL) {
     goto cleanup;
   }
 
   while (token != NULL) {
-    struct fat32_diriter_t *diriter = fat32_diriter_create(parent);
+    diriter = fat32_diriter_create(parent);
+
+    if (diriter == NULL) {
+      goto cleanup;
+    }
 
     int ret;
     struct fat32_fs_object_t *child;
@@ -263,39 +267,51 @@ fat32_fs_get_object(const struct fat32_fs_t *fs,
         if (child == NULL) {
           /* wrong path */
           *fs_object = NULL;
-          fat32_diriter_free(diriter);
 
-          return FE_OK;
+          return_code = FE_OK;
+          goto cleanup;
         }
 
         if (strcmp(token, child->name) == 0) {
-          parent = child;
           break;
         }
 
+        fat32_fs_object_free(child);
+
       } else {
-        error = ret;
-        fat32_diriter_free(diriter);
+        return_code = ret;
         goto cleanup;
       }
     }
 
     fat32_diriter_free(diriter);
+    diriter = NULL;
+
+    fat32_fs_object_free(parent);
+
+    parent = child;
 
     token = strtok_r(NULL, "/", &saveptr);
   }
 
   *fs_object = parent;
-  return FE_OK;
+
+  // making cleanup code not to free returned object
+  parent      = NULL;
+  return_code = FE_OK;
 
 cleanup:
   if (path_copy != NULL) {
     free(path_copy);
   }
 
+  if (diriter != NULL) {
+    fat32_diriter_free(diriter);
+  }
+
   if (parent != NULL) {
     fat32_fs_object_free(parent);
   }
 
-  return error;
+  return return_code;
 }

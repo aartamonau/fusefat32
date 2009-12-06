@@ -13,8 +13,12 @@
 
 #include <inttypes.h>
 
+#include "utils/inlines.h"
+
 #include "fat32/fs.h"
-#include "fat32/direntry.h"
+
+/// emtpy fat32_direntry_t definition to work around inlining issues.
+struct fat32_direntry_t;
 
 /// possible types of file system objects
 enum fat32_fs_object_type_t {
@@ -26,14 +30,14 @@ enum fat32_fs_object_type_t {
 /// structure defining file system object
 /// @todo extend
 struct fat32_fs_object_t {
-  enum fat32_fs_object_type_t    type; /**< type of underlying file system
-                                         object */
-  char                          *name; /**< utf-8 encoded name of the object
-                                          (is null for root directory) */
-  const struct fat32_direntry_t *direntry; /**< direntry corresponding to the
-                                             object (is null for root
-                                             directory) */
-  const struct fat32_fs_t       *fs;   /**< file system containing the object */
+  enum fat32_fs_object_type_t type; /**< type of underlying file system
+                                       object */
+  char                       *name; /**< utf-8 encoded name of the object
+                                       (is null for root directory) */
+  struct fat32_direntry_t    *direntry; /**< direntry corresponding to the
+                                           object (is null for root
+                                           directory) */
+  const struct fat32_fs_t    *fs;   /**< file system containing the object */
 };
 
 /**
@@ -84,5 +88,31 @@ fat32_fs_object_free(struct fat32_fs_object_t *fs_object);
  */
 uint32_t
 fat32_fs_object_first_cluster(const struct fat32_fs_object_t *fs_object);
+
+/**
+ * Determines whether file system object is an ordinary file.
+ *
+ * @param fs_object File system object.
+ *
+ * @return Boolean result.
+ */
+INLINE bool
+fat32_fs_object_is_file(const struct fat32_fs_object_t *fs_object)
+{
+  return fs_object->type == FAT32_FS_OBJECT_FILE;
+}
+
+/**
+ * Determines whether file system object is a directory.
+ *
+ * @param fs_object File system object
+ *
+ * @return Boolean result.
+ */
+INLINE bool
+fat32_fs_object_is_directory(const struct fat32_fs_object_t *fs_object)
+{
+  return !fat32_fs_object_is_file(fs_object);
+}
 
 #endif /* _FS_OBJECT_H_ */

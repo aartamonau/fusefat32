@@ -13,6 +13,7 @@
 #include "utils/files.h"
 
 #include "fat32/diriter.h"
+#include "fat32/direntry.h"
 #include "fat32/errors.h"
 #include "fat32/utils.h"
 
@@ -53,16 +54,16 @@ suitable_direntry(const struct fat32_direntry_t *direntry)
     return true;
   }
 
-  return ( fat32_direntry_is_file(direntry) &&
-           fat32_direntry_is_directory(direntry) &&
-           !fat32_direntry_is_empty(direntry));
+  return ( fat32_direntry_is_file(direntry) ||
+           fat32_direntry_is_directory(direntry) ||
+           fat32_direntry_is_empty(direntry));
 }
 
 enum fat32_error_t
 fat32_diriter_next(struct fat32_diriter_t    *diriter,
                    struct fat32_fs_object_t **fs_object)
 {
-  assert( diriter->offset < diriter->cluster_size );
+  /* assert( diriter->offset < diriter->cluster_size ); */
   assert( diriter->cluster != 0 );
 
   struct fat32_direntry_t  direntry;
@@ -101,7 +102,7 @@ fat32_diriter_next(struct fat32_diriter_t    *diriter,
     off_t cluster_offset = fat32_cluster_to_offset(fs->bpb, diriter->cluster);
     off_t offset         = cluster_offset + diriter->offset;
 
-    if (lseek(fs->fd, offset, SEEK_CUR) == (off_t) -1) {
+    if (lseek(fs->fd, offset, SEEK_SET) == (off_t) -1) {
       return FE_ERRNO;
     }
 
