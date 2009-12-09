@@ -11,14 +11,20 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #include "operations.h"
 #include "context.h"
 
 #include "utils/log.h"
 
+#include "fat32/bpb.h"
 #include "fat32/fs.h"
 #include "fat32/fh.h"
 #include "fat32/fs_object.h"
+#include "fat32/direntry.h"
 #include "fat32/diriter.h"
 
 /**
@@ -33,12 +39,19 @@ fs_object_attrs(const struct fat32_fs_object_t *fs_object,
 {
   /* TODO: command-line options */
   if (fat32_fs_object_is_directory(fs_object)) {
-    stbuf->st_mode  = S_IFDIR | 0755;
-    stbuf->st_nlink = 1;
+    stbuf->st_mode    = S_IFDIR | 0755;
+    stbuf->st_nlink   = 1;
   } else {
-    stbuf->st_mode  = S_IFREG | 0444;
-    stbuf->st_nlink = 1;
-    stbuf->st_size  = 0;
+    stbuf->st_mode    = S_IFREG | 0444;
+    stbuf->st_nlink   = 1;
+
+    off_t     size    = (off_t) fs_object->direntry->file_size;
+    blksize_t blksize = (blksize_t) fat32_bpb_cluster_size(fs_object->fs->bpb);
+    blkcnt_t  blkcnt  = (blkcnt_t) (size + blksize + 1) / blksize;
+
+    stbuf->st_size    = size;
+    stbuf->st_blksize = blksize;
+    stbuf->st_blocks  = blkcnt;
   }
 }
 

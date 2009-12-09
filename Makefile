@@ -23,7 +23,7 @@ else
 	CFLAGS += -O2 -funroll-loops
 endif
 CPPFLAGS := -iquote$(INCLUDE_DIR) $(FUSE_CPPFLAGS) \
-            -DFUSE_USE_VERSION=26
+            -DFUSE_USE_VERSION=26 -D_GNU_SOURCE
 LIBS     := $(FUSE_LIBS)
 
 SOURCES := $(shell find $(SRC_DIR) -name *.c -printf "%f\n")
