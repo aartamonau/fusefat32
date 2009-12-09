@@ -200,6 +200,8 @@ fat32_fs_open(const char *path, const struct fat32_fs_params_t *params,
     goto open_device_cleanup;
   }
 
+  fs->cluster_size = fat32_bpb_cluster_size(bpb);
+
   return FE_OK;
 
  open_device_cleanup:
@@ -228,10 +230,8 @@ fat32_fs_read_cluster(const struct fat32_fs_t *fs, void *buffer,
     return FE_INVALID_CLUSTER;
   }
 
-  off_t offset = fat32_cluster_to_offset(fs->bpb, cluster);
-
-  /* TODO: caching */
-  uint32_t cluster_size = fat32_bpb_cluster_size(fs->bpb);
+  off_t    offset = fat32_cluster_to_offset(fs->bpb, cluster);
+  uint32_t cluster_size = fs->cluster_size;
 
   if (lseek(fs->fd, offset, SEEK_CUR) == (off_t) -1) {
     return FE_ERRNO;

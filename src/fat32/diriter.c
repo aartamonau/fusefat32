@@ -24,8 +24,6 @@ fat32_diriter_create(const struct fat32_fs_object_t *fs_object)
           (fs_object->type == FAT32_FS_OBJECT_ROOT_DIR) );
 
   struct fat32_diriter_t   *diriter;
-  const struct fat32_fs_t  *fs  = fs_object->fs;
-  const struct fat32_bpb_t *bpb = fs->bpb;
 
   diriter = malloc(sizeof(struct fat32_diriter_t));
   if (diriter == NULL) {
@@ -35,7 +33,6 @@ fat32_diriter_create(const struct fat32_fs_object_t *fs_object)
   diriter->fs           = fs_object->fs;
   diriter->cluster      = fat32_fs_object_first_cluster(fs_object);
   diriter->offset       = 0;
-  diriter->cluster_size = fat32_bpb_cluster_size(bpb);
 
   return diriter;
 }
@@ -63,7 +60,6 @@ enum fat32_error_t
 fat32_diriter_next(struct fat32_diriter_t    *diriter,
                    struct fat32_fs_object_t **fs_object)
 {
-  /* assert( diriter->offset < diriter->cluster_size ); */
   assert( diriter->cluster != 0 );
 
   struct fat32_direntry_t  direntry;
@@ -73,7 +69,7 @@ fat32_diriter_next(struct fat32_diriter_t    *diriter,
   *fs_object = NULL;
 
   do {
-    if (diriter->offset == diriter->cluster_size) {
+    if (diriter->offset == diriter->fs->cluster_size) {
       diriter->offset = 0;
 
       uint32_t cluster = diriter->cluster;

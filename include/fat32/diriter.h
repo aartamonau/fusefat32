@@ -26,8 +26,6 @@ struct fat32_diriter_t {
                                             nothing to iterate. */
   uint32_t                 offset;       /**< Offset of the next item in cluster
                                             to iterate. */
-  uint32_t                 cluster_size; /**< cached size of the cluster
-                                            on the file system */
 };
 
 /**

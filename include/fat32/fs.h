@@ -50,6 +50,9 @@ struct fat32_fs_t {
                                        file handles and corresponding to them
                                        fs objects */
   struct fat32_fh_allocator_t *fh_allocator; /**< allocator for file handles */
+
+  uint32_t cluster_size;            /**< cached size of the cluster on file
+                                     * system */
 };
 
 /// filesystem parameters
