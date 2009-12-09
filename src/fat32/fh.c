@@ -13,6 +13,39 @@
 
 #include "fat32/fh.h"
 
+struct fat32_fh_allocator_t *
+fat32_fh_allocator_create(void)
+{
+  struct fat32_fh_allocator_t *allocator =
+    malloc(sizeof(struct fat32_fh_allocator_t));
+
+  if (allocator == NULL) {
+    return NULL;
+  }
+
+  allocator->last_fh = 0;
+
+  return allocator;
+}
+
+void
+fat32_fh_allocator_free(struct fat32_fh_allocator_t *allocator)
+{
+  free(allocator);
+}
+
+bool
+fat32_fh_allocate(struct fat32_fh_allocator_t *allocator,
+                  fat32_fh_t *fh)
+{
+  if (allocator->last_fh < UINT64_MAX) {
+    *fh = ++allocator->last_fh;
+    return true;
+  } else {
+    return false;
+  }
+}
+
 unsigned int
 fat32_fh_hash(const void *fh)
 {

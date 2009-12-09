@@ -16,6 +16,42 @@
 /// a type of file handle
 typedef uint64_t fat32_fh_t;
 
+/// Type representing file handles allocator.
+/// Oversimplified implementation. TODO: improve.
+struct fat32_fh_allocator_t {
+  fat32_fh_t last_fh;              /**< last allocated file handle */
+};
+
+/**
+ * Creates file handles allocator.
+ *
+ *
+ * @return New allocator. NULL on error. Error is specified using @em errno.
+ */
+struct fat32_fh_allocator_t *
+fat32_fh_allocator_create(void);
+
+/**
+ * Frees memory held by file handles allocator.
+ *
+ * @param allocator Allocator to free.
+ */
+void
+fat32_fh_allocator_free(struct fat32_fh_allocator_t *allocator);
+
+/**
+ * Allocates new file handle.
+ *
+ * @param      allocator Allocator used to allocate handlers.
+ * @param[out] fh        New file handle stored here.
+ *
+ * @retval     true      Handle allocated successfully.
+ * @retval     false     It's impossible to allocate new handlers.
+ */
+bool
+fat32_fh_allocate(struct fat32_fh_allocator_t *allocator,
+                  fat32_fh_t *fh);
+
 /**
  * Hash function on file handles.
  *
