@@ -35,7 +35,7 @@ fat32_diriter_create(const struct fat32_fs_object_t *fs_object)
   diriter->fs           = fs_object->fs;
   diriter->cluster      = fat32_fs_object_first_cluster(fs_object);
   diriter->offset       = 0;
-  diriter->cluster_size = bpb->sectors_per_cluster * bpb->bytes_per_sector;
+  diriter->cluster_size = fat32_bpb_cluster_size(bpb);
 
   return diriter;
 }

@@ -13,9 +13,11 @@
 
 #include <inttypes.h>
 
-#include "utils/inlines.h"
-
+#define REIMPORT_INLINES
 #include "fat32/fs.h"
+#undef REIMPORT_INLINES
+
+#include "utils/inlines.h"
 
 /// emtpy fat32_direntry_t definition to work around inlining issues.
 struct fat32_direntry_t;

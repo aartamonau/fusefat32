@@ -231,8 +231,7 @@ fat32_fs_read_cluster(const struct fat32_fs_t *fs, void *buffer,
   off_t offset = fat32_cluster_to_offset(fs->bpb, cluster);
 
   /* TODO: caching */
-  uint32_t cluster_size =
-    fs->bpb->sectors_per_cluster * fs->bpb->bytes_per_sector;
+  uint32_t cluster_size = fat32_bpb_cluster_size(fs->bpb);
 
   if (lseek(fs->fd, offset, SEEK_CUR) == (off_t) -1) {
     return FE_ERRNO;

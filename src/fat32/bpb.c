@@ -15,10 +15,12 @@
 #include <stdio.h>
 #include <sys/types.h>
 
-#include "fat32/bpb.h"
 #include "utils/files.h"
 #include "utils/errors.h"
 #include "utils/log.h"
+
+#define EXTERN_INLINE_DEFINITIONS
+#include "fat32/bpb.h"
 
 /// maximum possible size of a single cluster in bytes
 static const uint16_t MAX_CLUSTER_SIZE   = 32 * 1024;

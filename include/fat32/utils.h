@@ -13,7 +13,10 @@
 #include <sys/types.h>
 #include <inttypes.h>
 
+#define REIMPORT_INLINES
 #include "fat32/bpb.h"
+#undef REIMPORT_INLINES
+
 #include "utils/inlines.h"
 
 /**

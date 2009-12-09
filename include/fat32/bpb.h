@@ -15,6 +15,8 @@
 
 #include <inttypes.h>
 
+#include "utils/inlines.h"
+
 #include "fat32/errors.h"
 
 /// Structure describing all available BPB parameters
@@ -122,5 +124,18 @@ fat32_bpb_clusters_count(const struct fat32_bpb_t *bpb);
 bool
 fat32_bpb_is_valid_cluster(const struct fat32_bpb_t *bpb,
          uint32_t cluster);
+
+/**
+ * Returns a size of the cluster on the file system specified by bpb.
+ *
+ * @param bpb BPB.
+ *
+ * @return Cluster size.
+ */
+INLINE uint32_t
+fat32_bpb_cluster_size(const struct fat32_bpb_t *bpb)
+{
+  return bpb->sectors_per_cluster * bpb->bytes_per_sector;
+}
 
 #endif /* _BPB_H_ */
