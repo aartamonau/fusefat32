@@ -115,4 +115,14 @@ fat32_fs_object_is_directory(const struct fat32_fs_object_t *fs_object)
   return !fat32_fs_object_is_file(fs_object);
 }
 
+/**
+ * A cloner for fs objects to use with hash tables.
+ *
+ * @param fs_object A pointer to fs_object.
+ *
+ * @return New fs object of NULL on error.
+ */
+void *
+fat32_fs_object_cloner(const void *fs_object);
+
 #endif /* _FS_OBJECT_H_ */

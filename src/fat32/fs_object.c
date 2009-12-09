@@ -106,3 +106,45 @@ fat32_fs_object_first_cluster(const struct fat32_fs_object_t *fs_object)
     return cluster;
   }
 }
+
+void *
+fat32_fs_object_cloner(const void *fs_object)
+{
+  const struct fat32_fs_object_t *original =
+    (struct fat32_fs_object_t *) fs_object;
+
+  struct fat32_fs_object_t *result   = malloc(sizeof(struct fat32_fs_object_t));
+  if (result == NULL) {
+    return NULL;
+  }
+
+  result->name     = NULL;
+  result->direntry = NULL;
+
+  result->name = strdup(original->name);
+  if (result->name == NULL) {
+    goto fs_object_allocator_cleanup;
+  }
+
+  if (original->direntry != NULL) {
+    result->direntry = malloc(sizeof(struct fat32_direntry_t));
+    if (result->direntry == NULL) {
+      goto fs_object_allocator_cleanup;
+    }
+
+    memcpy(result->direntry, original->direntry,
+           sizeof(struct fat32_direntry_t));
+  }
+
+  return result;
+fs_object_allocator_cleanup:
+  if (result->name != NULL) {
+    free(result);
+  }
+
+  if (result->direntry != NULL) {
+    free(result->direntry);
+  }
+
+  return NULL;
+}
