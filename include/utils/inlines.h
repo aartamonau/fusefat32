@@ -18,5 +18,9 @@
 #ifndef EXTERN_INLINE_DEFINITIONS
   #define INLINE inline
 #else
-  #define INLINE extern
+  #ifndef REIMPORT_INLINES
+    #define INLINE extern
+  #else
+    #define INLINE inline
+  #endif
 #endif
