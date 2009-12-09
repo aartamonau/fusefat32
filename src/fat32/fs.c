@@ -22,6 +22,7 @@
 #include "fat32/utils.h"
 #include "fat32/diriter.h"
 #include "fat32/fs_object.h"
+#include "fat32/fh.h"
 #include "utils/files.h"
 
 /**
@@ -65,9 +66,17 @@ fat32_fs_cleanup(struct fat32_fs_t* fs)
 
     if (fs->fat != NULL) {
       if (fat32_fat_finalize(fs->fat) != FE_OK) {
-  return -1;
+        return -1;
       }
       free(fs->fat);
+    }
+
+    if (fs->fh_table != NULL) {
+      hash_table_free(fs->fh_table);
+    }
+
+    if (fs->fh_allocator != NULL) {
+      fat32_fh_allocator_free(fs->fh_allocator);
     }
 
     free(fs);
@@ -77,7 +86,7 @@ fat32_fs_cleanup(struct fat32_fs_t* fs)
 }
 
 enum fat32_error_t
-fat32_fs_open(const char *path, params_t params,
+fat32_fs_open(const char *path, const struct fat32_fs_params_t *params,
               struct fat32_fs_t **result)
 {
   struct fat32_fs_t      *fs;
@@ -97,11 +106,13 @@ fat32_fs_open(const char *path, params_t params,
 
   *result = fs;
 
-  fs->fd         = -1;
-  fs->bpb        = NULL;
-  fs->fs_info    = NULL;
-  fs->write_lock = NULL;
-  fs->fat        = NULL;
+  fs->fd           = -1;
+  fs->bpb          = NULL;
+  fs->fs_info      = NULL;
+  fs->write_lock   = NULL;
+  fs->fat          = NULL;
+  fs->fh_table     = NULL;
+  fs->fh_allocator = NULL;
 
   lock = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
   if (lock == NULL) {
@@ -172,6 +183,20 @@ fat32_fs_open(const char *path, params_t params,
   op_status = fat32_fat_init(fs->fat, fs);
   if (op_status != FE_OK) {
     error = op_status;
+    goto open_device_cleanup;
+  }
+
+  fs->fh_table =
+    hash_table_create(params->fh_table_size,
+                      fat32_fh_hash, fat32_fh_equal,
+                      fat32_fh_cloner, NULL,
+                      free, (deallocator_t) fat32_fs_object_free);
+  if (fs->fh_table == NULL) {
+    goto open_device_cleanup;
+  }
+
+  fs->fh_allocator = fat32_fh_allocator_create();
+  if (fs->fh_allocator == NULL) {
     goto open_device_cleanup;
   }
 

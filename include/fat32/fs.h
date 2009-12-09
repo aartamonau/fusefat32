@@ -17,6 +17,8 @@
 #include <sys/stat.h>
 #include <pthread.h>
 
+#include "hash_table.h"
+
 #include "fat32/bpb.h"
 #include "fat32/fs_info.h"
 #include "fat32/fat.h"
@@ -43,10 +45,17 @@ struct fat32_fs_t {
   struct fat32_bpb_t     *bpb;     /**< bios parameters block */
   struct fat32_fs_info_t *fs_info; /**< FSInfo */
   struct fat32_fat_t     *fat;     /**< FAT-related data */
+
+  struct hash_table_t    *fh_table; /**< hash table containing open
+                                       file handles and corresponding to them
+                                       fs objects */
+  struct fat32_fh_allocator_t *fh_allocator; /**< allocator for file handles */
 };
 
 /// filesystem parameters
-typedef uint32_t params_t;
+struct fat32_fs_params_t {
+  size_t fh_table_size;       /**< a size of hash table for file handles  */
+};
 
 /**
  * Opens a filesystem for future work.
@@ -64,7 +73,7 @@ typedef uint32_t params_t;
  * @retval FE_INVALID_FS BPB/FSInfo on the device is inconsistent
  */
 enum fat32_error_t
-fat32_fs_open(const char *path, params_t params,
+fat32_fs_open(const char *path, const struct fat32_fs_params_t *params,
         struct fat32_fs_t **fs);
 
 /**

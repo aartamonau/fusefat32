@@ -188,7 +188,8 @@ main(int argc, char *argv[])
   log_info(_("Opening file system..."));
 
   enum fat32_error_t ret;
-  ret = fat32_fs_open(config->device, 0,
+  struct fat32_fs_params_t params = { .fh_table_size = 1024 };
+  ret = fat32_fs_open(config->device, &params,
                       &fusefat32.fs);
 
   if (ret == FE_OK) {

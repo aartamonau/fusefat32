@@ -17,6 +17,7 @@
 #include "utils/log.h"
 
 #include "fat32/fs.h"
+#include "fat32/fh.h"
 #include "fat32/fs_object.h"
 #include "fat32/diriter.h"
 
@@ -52,7 +53,7 @@ fs_object_attrs(const struct fat32_fs_object_t *fs_object,
 int
 fat32_getattr(const char *path, struct stat *stbuf)
 {
-  /* TODO: optimize */
+  /* TODO: optimize (caching) */
 
   struct fuse_context        *context    = fuse_get_context();
   struct fusefat32_context_t *ff_context =
@@ -195,7 +196,106 @@ cleanup:
   return retcode;
 }
 
+/**
+ * Function that implements @em open system call.
+ *
+ * @param path      A path to file to open.
+ * @param file_info File info.
+ *
+ * @return Operation result.
+ */
+int fat32_open(const char *path, struct fuse_file_info *file_info)
+{
+  struct fuse_context        *context    = fuse_get_context();
+  struct fusefat32_context_t *ff_context =
+    (struct fusefat32_context_t *) context->private_data;
+  struct fat32_fs_object_t   *fs_object;
+
+  enum fat32_error_t ret = fat32_fs_get_object(ff_context->fs,
+                                               path,
+                                               &fs_object);
+  int                retcode;
+
+
+  if (ret == FE_OK) {
+    if (fs_object == NULL) {
+      return -EPERM;
+    } else {
+      const struct fat32_fs_t *fs = fs_object->fs;
+      fat32_fh_t         fh;
+
+      if (fat32_fs_object_is_directory(fs_object)) {
+        retcode = -EISDIR;
+        goto fat32_open_cleanup;
+      }
+
+      if (!fat32_fh_allocate(fs->fh_allocator, &fh)) {
+        /* TODO: fix it */
+        retcode = -ENFILE;
+        goto fat32_open_cleanup;
+      }
+
+      /* TODO: writing */
+      if ((file_info->flags & O_ACCMODE) != O_RDONLY) {
+        retcode = -EPERM;
+        goto fat32_open_cleanup;
+      } else {
+
+        /* TODO: Think of adding yet another layer of indirection.
+         *       Possibly there must be mapping between paths and
+         *       and file handles. And then between path and fs objects.
+         */
+        file_info->fh = fh;
+        if (hash_table_insert(fs->fh_table, &fh, fs_object) == NULL) {
+          retcode = errno;
+          goto fat32_open_cleanup;
+        }
+        return 0;
+      }
+    }
+  } else {
+    switch (ret) {
+    case FE_ERRNO:
+      return -errno;
+    case FE_INVALID_DEV:
+      return -EBADF;
+    default:
+      assert( false );
+    }
+  }
+fat32_open_cleanup:
+  if (fs_object != NULL) {
+    fat32_fs_object_free(fs_object);
+  }
+  return retcode;
+}
+
+/**
+ * Implements @em close system call.
+ *
+ * @param path      A path to file being closed.
+ * @param file_info File info.
+ *
+ * @return Operation result.
+ */
+int
+fat32_release(const char *path, struct fuse_file_info *file_info)
+{
+  struct fuse_context        *context    = fuse_get_context();
+  struct fusefat32_context_t *ff_context =
+    (struct fusefat32_context_t *) context->private_data;
+  struct fat32_fs_t          *fs         = ff_context->fs;
+
+  /* TODO: file handle freeing */
+
+  hash_table_delete(fs->fh_table, &file_info->fh);
+
+  return 0;
+}
+
 const struct fuse_operations fusefat32_operations = {
   .readdir = fat32_readdir,
   .getattr = fat32_getattr,
+  .open    = fat32_open,
+  .release = fat32_release,
 };
