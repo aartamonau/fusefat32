@@ -149,7 +149,8 @@ fat32_readdir(const char *path, void *buffer, fuse_fill_dir_t filler,
   }
 
   if (!fat32_fs_object_is_directory(fs_object)) {
-    return -ENOTDIR;
+    retcode = -ENOTDIR;
+    goto cleanup;
   }
 
   diriter = fat32_diriter_create(fs_object);
