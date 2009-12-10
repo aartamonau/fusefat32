@@ -68,9 +68,9 @@ fat32_fat_finalize(struct fat32_fat_t *fat);
 /**
  * Returns a FAT entry for a given cluster number
  *
- * @param fat FAT
- * @param cluster Cluster number for which a FAT entry must be returned.
- * @param entry a place to store the resulting entry
+ * @param      fat FAT
+ * @param      cluster Cluster number for which a FAT entry must be returned.
+ * @param[out] entry a place to store the resulting entry
  *
  * @retval FE_OK
  * @retval FE_ERRNO @li @em lseek failed
@@ -80,6 +80,29 @@ fat32_fat_finalize(struct fat32_fat_t *fat);
 enum fat32_error_t
 fat32_fat_get_entry(const struct fat32_fat_t *fat,
                     uint32_t cluster, fat32_fat_entry_t *entry);
+
+/**
+ * Returns a nth FAT entry for a cluster. If n == 1 then this function
+ * is equal to ::fat32_fat_get_entry. If n == 0 then such entry is returned
+ * that it corresponds to a @em cluster parameter supplied.
+ *
+ * @param      fat     FAT
+ * @param      cluster Starting cluster number.
+ * @param      n       A number of interested cluster in the cluster chain
+ *                     beginning with @em cluster.
+ * @param[out] entry   A place to store resulting entry.
+ *
+ * @retval FE_OK
+ * @retval FE_ERRNO @li @em lseek failed
+ *                  @li data can't be read from underlying device
+ * @retval FE_INVALID_DEV - underlying device file ended prematurely
+ * @retval FE_CLUSTER_CHAIN_ENDED - a number of clusters in chain is less
+ *                                  than requested @em n.
+ */
+enum fat32_error_t
+fat32_fat_get_nth_entry(const struct fat32_fat_t *fat,
+                        uint32_t cluster, uint32_t n,
+                        fat32_fat_entry_t *entry);
 
 /**
  * Indicates whether cluster corresponding to the given FAT entry is the

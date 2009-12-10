@@ -25,6 +25,7 @@ enum fat32_error_t {
   FE_INVALID_FS,                /**< invalid filesystem */
   FE_INVALID_CLUSTER,           /**< provided cluster number is invalid for
                                    the given file system */
+  FE_CLUSTER_CHAIN_ENDED        /**< cluster chain ended prematurely */
 };
 
 #endif /* _FAT32_ERRORS_H_ */

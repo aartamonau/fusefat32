@@ -58,8 +58,8 @@ fat32_fat_get_entry(const struct fat32_fat_t *fat,
   uint32_t entry_sector_offset = entry_fat_offset % fat->bpb->bytes_per_sector;
 
   off_t file_offset = fat32_sector_offset_to_offset(fat->bpb,
-                entry_sector,
-                entry_sector_offset);
+                                                    entry_sector,
+                                                    entry_sector_offset);
 
   off_t ret = lseek(fat->fd, file_offset, SEEK_SET);
   if (ret < (off_t) 0) {
@@ -73,6 +73,32 @@ fat32_fat_get_entry(const struct fat32_fat_t *fat,
     }
   } else {
     return FE_ERRNO;
+  }
+
+  return FE_OK;
+}
+
+enum fat32_error_t
+fat32_fat_get_nth_entry(const struct fat32_fat_t *fat,
+                        uint32_t cluster, uint32_t n,
+                        fat32_fat_entry_t *entry)
+{
+  *entry     = cluster;
+  uint32_t i = 0;
+  while (i < n) {
+    enum fat32_error_t ret = fat32_fat_get_entry(fat, cluster, entry);
+    if (ret != FE_OK) {
+      return ret;
+    }
+
+    if (fat32_fat_entry_is_null(*entry)) {
+      return FE_CLUSTER_CHAIN_ENDED;
+    }
+
+    cluster = fat32_fat_entry_to_cluster(*entry);
+    if (!fat32_fat_entry_is_bad(*entry)) {
+      ++i;
+    }
   }
 
   return FE_OK;

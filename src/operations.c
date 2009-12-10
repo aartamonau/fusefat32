@@ -19,6 +19,7 @@
 #include "context.h"
 
 #include "utils/log.h"
+#include "utils/files.h"
 
 #include "fat32/bpb.h"
 #include "fat32/fs.h"
@@ -26,6 +27,8 @@
 #include "fat32/fs_object.h"
 #include "fat32/direntry.h"
 #include "fat32/diriter.h"
+#include "fat32/fat.h"
+#include "fat32/utils.h"
 
 /**
  * Fills @em stbuf structure with fs object attributes.
@@ -306,9 +309,104 @@ fat32_release(const char *path, struct fuse_file_info *file_info)
   return 0;
 }
 
+/**
+ * Implements @em read system call.
+ *
+ * @param path      A path to file to read.
+ * @param buffer    A buffer to store read data.
+ * @param size      A size of data to be read.
+ * @param offset    An offset from the beginning of the file.
+ * @param file_info Additional information.
+ *
+ * @return Number of read characters on success. 0 is returned when EOF occured.
+ *         Negative value indicates an erorr. It's specified using @em errno.
+ */
+int
+fat32_read(const char *path, char *buffer, size_t size, off_t offset,
+           struct fuse_file_info *file_info)
+{
+  struct fuse_context        *context    = fuse_get_context();
+  struct fusefat32_context_t *ff_context =
+    (struct fusefat32_context_t *) context->private_data;
+  struct fat32_fs_t          *fs         = ff_context->fs;
+  struct fat32_bpb_t         *bpb        = fs->bpb;
+  struct fat32_fat_t         *fat        = fs->fat;
+
+
+  struct fat32_fs_object_t   *fs_object =
+    hash_table_lookup(fs->fh_table, &file_info->fh);
+
+  assert( fs_object != NULL );
+
+  uint32_t file_size = fs_object->direntry->file_size;
+  if (offset >= file_size) {
+    /* EOF */
+    return 0;
+  }
+
+  if (offset + size > file_size) {
+    size = file_size - offset;
+  }
+
+  uint32_t           csize   = fs->cluster_size;
+  uint32_t           cluster = fat32_fs_object_first_cluster(fs_object);
+  uint32_t           n       = offset / csize;
+  uint16_t           coffset = offset % csize;
+  fat32_fat_entry_t  entry;
+  enum fat32_error_t ret     =
+    fat32_fat_get_nth_entry(fat, cluster, n, &entry);
+
+  ssize_t overall = 0;
+  while (size) {
+    if (ret == FE_OK) {
+      cluster                    = fat32_fat_entry_to_cluster(entry);
+      off_t              goffset =
+        fat32_cluster_to_offset(bpb, cluster) + coffset;
+
+      off_t seekret = lseek(fs->fd, goffset, SEEK_SET);
+      if (seekret == (off_t) -1) {
+        return -errno;
+      }
+
+      uint16_t  cunread = csize - coffset;
+      uint32_t  to_read = (cunread > size) ? size : cunread;
+      ssize_t     nread = xread(fs->fd, buffer, to_read);
+      if (nread == -1) {
+        return -errno;
+      } else if (nread < to_read) {
+        // invalid device again
+        return -EBADF;
+      }
+      buffer  += nread;
+      overall += nread;
+      ret      = fat32_fat_get_entry(fat, cluster, &entry);
+      coffset  = 0;
+      size    -= nread;
+
+    } else {
+      switch (ret) {
+      case FE_ERRNO:
+        return -ret;
+      case FE_INVALID_DEV:
+      case FE_CLUSTER_CHAIN_ENDED: /* this must not happen because
+                                    * we decreased requested size to fit
+                                    * in file */
+        return -EBADF;
+      default:
+        assert( false );
+      }
+    }
+  }
+
+  /* TODO: cache file object cluster position */
+
+  return overall;
+}
+
 const struct fuse_operations fusefat32_operations = {
   .readdir = fat32_readdir,
   .getattr = fat32_getattr,
   .open    = fat32_open,
   .release = fat32_release,
+  .read    = fat32_read,
 };

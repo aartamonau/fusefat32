@@ -40,6 +40,11 @@ struct fat32_fs_object_t {
                                            object (is null for root
                                            directory) */
   const struct fat32_fs_t    *fs;   /**< file system containing the object */
+
+  uint32_t                    last_cluster; /**< last accessed cluster */
+  uint32_t                    last_cluster_number; /**< a number of the last
+                                                    * accessed cluster in the
+                                                    * file's cluster chain */
 };
 
 /**
