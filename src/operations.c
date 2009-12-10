@@ -184,7 +184,7 @@ fat32_readdir(const char *path, void *buffer, fuse_fill_dir_t filler,
 
       fs_object_attrs(fs_object, &stbuf);
 
-      int fret = filler(buffer, fs_object->name, NULL, 0);
+      int fret = filler(buffer, fs_object->name, &stbuf, 0);
       if (fret != 0) {
         /* error */
         retcode = -errno;
