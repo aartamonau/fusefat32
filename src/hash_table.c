@@ -164,30 +164,6 @@ hash_table_free(struct hash_table_t *hash_table)
   }
 }
 
-void
-list_free(struct list_t *list,
-          deallocator_t key_deallocator,
-          deallocator_t value_deallocator)
-{
-  struct list_t *current   = list;
-  bool   deallocate_keys   = key_deallocator != NULL;
-  bool   deallocate_values = value_deallocator != NULL;
-
-  while (current != NULL) {
-    struct list_t *next = current->next;
-
-    if (deallocate_keys) {
-      key_deallocator(current->key);
-    }
-    if (deallocate_values) {
-      value_deallocator(current->value);
-    }
-
-    free(current);
-    current = next;
-  }
-}
-
 struct hash_table_t *
 hash_table_insert(struct hash_table_t *hash_table,
                   void *key, void *value)
@@ -229,6 +205,30 @@ hash_table_delete(struct hash_table_t *hash_table, const void *key)
                                         hash_table->equal,
                                         hash_table->key_deallocator,
                                         hash_table->value_deallocator);
+}
+
+void
+list_free(struct list_t *list,
+          deallocator_t key_deallocator,
+          deallocator_t value_deallocator)
+{
+  struct list_t *current   = list;
+  bool   deallocate_keys   = key_deallocator != NULL;
+  bool   deallocate_values = value_deallocator != NULL;
+
+  while (current != NULL) {
+    struct list_t *next = current->next;
+
+    if (deallocate_keys) {
+      key_deallocator(current->key);
+    }
+    if (deallocate_values) {
+      value_deallocator(current->value);
+    }
+
+    free(current);
+    current = next;
+  }
 }
 
 struct list_t *
