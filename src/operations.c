@@ -48,7 +48,7 @@ fs_object_attrs(const struct fat32_fs_object_t *fs_object,
     stbuf->st_mode    = S_IFREG | 0444;
     stbuf->st_nlink   = 1;
 
-    off_t     size    = (off_t) fs_object->direntry->file_size;
+    off_t     size    = (off_t) fat32_fs_object_size(fs_object);
     blksize_t blksize = (blksize_t) fat32_bpb_cluster_size(fs_object->fs->bpb);
     blkcnt_t  blkcnt  = (blkcnt_t) (size + blksize + 1) / blksize;
 

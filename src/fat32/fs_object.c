@@ -15,8 +15,6 @@
 #include "fat32/fs_object.h"
 #undef  EXTERN_INLINE_DEFINITIONS
 
-#include "fat32/direntry.h"
-
 struct fat32_fs_object_t *
 fat32_fs_object_root_dir(const struct fat32_fs_t *fs)
 {

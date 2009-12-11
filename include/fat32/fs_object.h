@@ -11,16 +11,19 @@
 #ifndef _FS_OBJECT_H_
 #define _FS_OBJECT_H_
 
+#include <assert.h>
+
 #include <inttypes.h>
 
 #define REIMPORT_INLINES
 #include "fat32/fs.h"
+#include "fat32/direntry.h"
 #undef REIMPORT_INLINES
 
 #include "utils/inlines.h"
 
-/// emtpy fat32_direntry_t definition to work around inlining issues.
-struct fat32_direntry_t;
+/* /// emtpy fat32_direntry_t definition to work around inlining issues. */
+/* struct fat32_direntry_t; */
 
 /// possible types of file system objects
 enum fat32_fs_object_type_t {
@@ -145,5 +148,20 @@ fat32_fs_object_is_root_directory(const struct fat32_fs_object_t *fs_object)
  */
 void *
 fat32_fs_object_cloner(const void *fs_object);
+
+/**
+ * Returns a size of fs object.
+ *
+ * @param fs_object fs object corresponding to some file (not a directory)
+ *
+ * @return file size
+ */
+INLINE uint32_t
+fat32_fs_object_size(const struct fat32_fs_object_t *fs_object)
+{
+  assert( fat32_fs_object_is_file(fs_object) );
+
+  return fs_object->direntry->file_size;
+}
 
 #endif /* _FS_OBJECT_H_ */
