@@ -30,7 +30,7 @@ static const uint16_t MAX_CLUSTER_SIZE   = 32 * 1024;
 static const uint16_t FAT32_FS_VERSION   = 0x0000;
 
 /// minimum valid cluster number
-static const uint32_t MIN_CLUSTER_NUMBER = 2;
+const uint32_t FAT32_MIN_CLUSTER_NUMBER = 2;
 
 /// minimum number of clusters that valid FAT32 file system can contain
 static const uint32_t FAT32_MIN_CLUSTERS = 65525;
@@ -215,6 +215,6 @@ fat32_bpb_is_valid_cluster(const struct fat32_bpb_t *bpb,
 {
   uint32_t clusters_count = fat32_bpb_clusters_count(bpb);
 
-  return (cluster >= MIN_CLUSTER_NUMBER &&
-    cluster <= clusters_count + 1);
+  return (cluster >= FAT32_MIN_CLUSTER_NUMBER &&
+          cluster <= clusters_count + 1);
 }

@@ -19,6 +19,8 @@
 
 #include "fat32/errors.h"
 
+extern const uint32_t FAT32_MIN_CLUSTER_NUMBER;
+
 /// Structure describing all available BPB parameters
 struct fat32_bpb_t {
   uint8_t  jmp_boot[3];            /**< jump instruction to boot code */

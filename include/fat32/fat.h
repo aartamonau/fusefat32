@@ -23,6 +23,12 @@ struct fat32_fat_t {
                                             used in #fat32_fs_t */
   uint32_t bytes_per_sector_log;         /**< the number of the highest bit set
                                             in bytes_per_sector */
+  uint32_t free_cluster_hint;            /**< This field has the same meaning
+                                          * as
+                                          #fat32_fs_info_t::free_cluster_hint
+                                          with the difference that here it's
+                                          always set to correct value. Saved to
+                                          fs_info on unmount. */
   const struct fat32_bpb_t *bpb;         /**< a pointer to BPB allocated by and
                                             initialized by
                                             fat32_fs_open() call
@@ -139,14 +145,28 @@ uint32_t
 fat32_fat_entry_to_cluster(fat32_fat_entry_t entry);
 
 /**
- * Indicates whether the cluster number which is stored in directory entry
- * of some file means that this file is empty.
+ * Indicates whether a cluster corresponding to the given FAT entry is free.
  *
- * @param cluster a number of cluster to check
+ * @param entry FAT entry.
  *
  * @return boolean value determining whether cluster is free
  */
 bool
-fat32_fat_cluster_is_free(uint32_t cluster);
+fat32_fat_entry_is_free(fat32_fat_entry_t entry);
+
+/**
+ * Tries to find a free cluster.
+ *
+ * @param      fat     FAT object.
+ * @param[out] cluster A number of free cluster is stored here on success.
+ *
+ * @retval FE_OK         Free cluster found successfully
+ * @retval FE_ERRNO @li @em lseek failed
+ *                  @li data can't be read from underlying device
+ * @retval FE_INVALID_DEV - underlying device file ended prematurely
+ * @retval FE_FS_IS_FULL There is no free space on the file system.
+ */
+enum fat32_error_t
+fat32_fat_find_free_cluster(struct fat32_fat_t *fat, uint32_t *cluster);
 
 #endif /* _FAT_H_ */

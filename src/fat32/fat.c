@@ -24,9 +24,13 @@ fat32_fat_init(struct fat32_fat_t *fat,
     return FE_ERRNO;
   }
 
-  fat->fd      = fd;
-  fat->bpb     = fs->bpb;
-  fat->fs_info = fs->fs_info;
+  fat->fd                = fd;
+  fat->bpb               = fs->bpb;
+  fat->fs_info           = fs->fs_info;
+  /* we set a hint to the minimum possible cluster number as opposite to
+   * free cluster hint from fsinfo because the latter can contain incorrect
+   * information */
+  fat->free_cluster_hint = FAT32_MIN_CLUSTER_NUMBER;
 
   fat->bytes_per_sector_log =
     fat32_highest_bit_number(fs->bpb->bytes_per_sector);
@@ -131,7 +135,31 @@ fat32_fat_entry_to_cluster(fat32_fat_entry_t entry)
 }
 
 bool
-fat32_fat_cluster_is_free(uint32_t cluster)
+fat32_fat_entry_is_free(fat32_fat_entry_t entry)
 {
-  return cluster == 0;
+  return (entry & FAT32_FAT_ENTRY_MASK) == 0;
+}
+
+enum fat32_error_t
+fat32_fat_find_free_cluster(struct fat32_fat_t *fat, uint32_t *cluster)
+{
+  uint32_t candidate = fat->free_cluster_hint;
+  uint32_t total     =
+    fat32_bpb_clusters_count(fat->bpb) + FAT32_MIN_CLUSTER_NUMBER;
+
+  while (candidate < total) {
+    fat32_fat_entry_t  entry;
+    enum fat32_error_t ret = fat32_fat_get_entry(fat, candidate, &entry);
+    if (ret != FE_OK) {
+      return ret;
+    }
+
+    if (fat32_fat_entry_is_free(entry)) {
+      fat->free_cluster_hint = candidate;
+      return candidate;
+    }
+
+    ++candidate;
+  }
+  return FE_FS_IS_FULL;
 }
