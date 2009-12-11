@@ -18,6 +18,7 @@
 #include <string.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <libgen.h>
 
 /* /\* using the latest API version *\/ */
 /* #define FUSE_USE_VERSION 26 */
@@ -113,10 +114,31 @@ fusefat32_process_options(void *data, const char *arg, int key,
 
     /* discard option */
     return 0;
-  }
+  case FUSE_OPT_KEY_NONOPT:
+    if (config->parent_dir == NULL) {
+      char *path;
 
-  /* keep option */
-  return 1;
+      if ((path = realpath(arg, NULL)) == NULL) {
+        fprintf(stderr, _("fusefat32: Bad mountpoint `%s`: %s\n"),
+                arg, strerror(errno));
+        return -1;
+      } else {
+        config->parent_dir = strdup(dirname(path));
+        if (config->parent_dir == NULL) {
+          fputs(_("fusefat32: Memory allocation error\n"), stderr);
+          return -1;
+        }
+        free(path);
+        return 1;
+      }
+    } else {
+      fprintf(stderr, _("fusefat32: Invalid options `%s`\n"), arg);
+      return -1;
+    }
+  default:
+    /* keep option */
+    return 1;
+  }
 }
 
 /**
@@ -135,13 +157,16 @@ main(int argc, char *argv[])
                                              .fs     = NULL };
   bool logging_used                      = false;
   int  return_code                       = EXIT_FAILURE;
+  struct fusefat32_config_t *config      = NULL;
 
 
 
-  fuse_opt_parse(&args, &fusefat32, fusefat32_options,
-                 fusefat32_process_options);
+  if (fuse_opt_parse(&args, &fusefat32, fusefat32_options,
+                     fusefat32_process_options) == -1) {
+    goto main_cleanup;
+  }
 
-  struct fusefat32_config_t *config = &fusefat32.config;
+  config = &fusefat32.config;
 
   /* if we are here then it means that neither version nor help key has been
      activated
@@ -237,6 +262,12 @@ main(int argc, char *argv[])
 
   if (logging_used) {
     log_close();
+  }
+
+  if (config != NULL) {
+    if (config->parent_dir != NULL) {
+      free(config->parent_dir);
+    }
   }
 
   return return_code;

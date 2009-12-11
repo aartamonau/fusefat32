@@ -123,6 +123,20 @@ fat32_fs_object_is_directory(const struct fat32_fs_object_t *fs_object)
 }
 
 /**
+ * Determines whether file system object is a root directory.
+ *
+ * @param fs_object Object to check
+ *
+ * @return Boolean result.
+ */
+INLINE bool
+fat32_fs_object_is_root_directory(const struct fat32_fs_object_t *fs_object)
+{
+  return fs_object->type == FAT32_FS_OBJECT_ROOT_DIR;
+}
+
+
+/**
  * A cloner for fs objects to use with hash tables.
  *
  * @param fs_object A pointer to fs_object.

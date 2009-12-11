@@ -126,6 +126,7 @@ fat32_readdir(const char *path, void *buffer, fuse_fill_dir_t filler,
   struct fat32_fs_object_t *fs_object = NULL;
   struct fat32_diriter_t   *diriter   = NULL;
   enum   fat32_error_t      ret;
+  struct stat               stbuf;
 
   int    retcode;
 
@@ -151,6 +152,27 @@ fat32_readdir(const char *path, void *buffer, fuse_fill_dir_t filler,
   if (!fat32_fs_object_is_directory(fs_object)) {
     retcode = -ENOTDIR;
     goto cleanup;
+  }
+
+  /* adding . and .. for root directory */
+  if (fat32_fs_object_is_root_directory(fs_object)) {
+    struct fusefat32_config_t *config = &ff_context->config;
+
+    if (stat(config->parent_dir, &stbuf) != 0) {
+      retcode = -errno;
+      goto cleanup;
+    }
+
+    if (filler(buffer, "..", &stbuf, 0) != 0) {
+      retcode = -errno;
+      goto cleanup;
+    }
+
+    fs_object_attrs(fs_object, &stbuf);
+    if (filler(buffer, ".", &stbuf, 0) != 0) {
+      retcode = -errno;
+      goto cleanup;
+    }
   }
 
   diriter = fat32_diriter_create(fs_object);
@@ -180,8 +202,6 @@ fat32_readdir(const char *path, void *buffer, fuse_fill_dir_t filler,
     }
 
     if (fs_object != NULL) {
-      struct stat stbuf;
-
       fs_object_attrs(fs_object, &stbuf);
 
       int fret = filler(buffer, fs_object->name, &stbuf, 0);

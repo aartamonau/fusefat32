@@ -18,6 +18,7 @@
  *
  */
 struct fusefat32_config_t {
+  char *parent_dir;             /**< a parent directory to mount point */
   char *device;                 /**< a path to device to mount */
   char *log;                    /**< a path to log file */
   bool  verbose;                /**< behave verbosely */
@@ -26,8 +27,11 @@ struct fusefat32_config_t {
 };
 
 /// default fusefat32 config
-#define FUSEFAT32_CONFIG_DEFAULT { .device  = NULL, \
-                                   .verbose = false }
+#define FUSEFAT32_CONFIG_DEFAULT { .parent_dir  = NULL, \
+                                   .device      = NULL, \
+                                   .log         = NULL, \
+                                   .foreground  = false,\
+                                   .verbose     = false }
 
 /**
  * Generates FUSE input option descriptor
