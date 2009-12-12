@@ -408,6 +408,7 @@ fat32_read(const char *path, char *buffer, size_t size, off_t offset,
       switch (ret) {
       case FE_ERRNO:
         return -ret;
+      case FE_INVALID_FS:
       case FE_INVALID_DEV:
       case FE_CLUSTER_CHAIN_ENDED: /* this must not happen because
                                     * we decreased requested size to fit

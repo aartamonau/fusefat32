@@ -102,6 +102,7 @@ fat32_fat_get_entry(const struct fat32_fat_t *fat,
  * @retval FE_ERRNO @li @em lseek failed
  *                  @li data can't be read from underlying device
  * @retval FE_INVALID_DEV - underlying device file ended prematurely
+ * @retval FE_INVALID_FS  - bad or free cluster encountered in cluster chain.
  * @retval FE_CLUSTER_CHAIN_ENDED - a number of clusters in chain is less
  *                                  than requested @em n.
  */

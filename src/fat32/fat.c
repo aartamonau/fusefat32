@@ -119,8 +119,9 @@ fat32_fat_get_nth_entry(const struct fat32_fat_t *fat,
     }
 
     cluster = fat32_fat_entry_to_cluster(*entry);
-    if (!fat32_fat_entry_is_bad(*entry)) {
-      ++i;
+    if (fat32_fat_entry_is_bad(*entry) ||
+        fat32_fat_entry_is_free(*entry)) {
+      return FE_INVALID_FS;
     }
   }
 
