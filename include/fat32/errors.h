@@ -26,7 +26,9 @@ enum fat32_error_t {
   FE_INVALID_CLUSTER,           /**< provided cluster number is invalid for
                                    the given file system */
   FE_CLUSTER_CHAIN_ENDED,       /**< cluster chain ended prematurely */
-  FE_FS_IS_FULL                 /**< no free space on the file system */
+  FE_FS_IS_FULL,                /**< no free space on the file system */
+  FE_FS_INCONSISTENT            /**< returned when because of IO errors file
+                                 * system is left in inconsistent state. */
 };
 
 #endif /* _FAT32_ERRORS_H_ */
