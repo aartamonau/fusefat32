@@ -114,4 +114,25 @@ hash_table_delete(struct hash_table_t *hash_table, const void *key);
 void *
 hash_table_lookup(struct hash_table_t *hash_table, const void *key);
 
+/**
+ * Hash function for strings.
+ *
+ * @param str A string.
+ *
+ * @return Hash value.
+ */
+unsigned int
+hash_table_string_hash(const void *str);
+
+/**
+ * Equality function for strings.
+ *
+ * @param a String.
+ * @param b String.
+ *
+ * @return Result of comparison.
+ */
+bool
+hash_table_string_equal(const void *a, const void *b);
+
 #endif

@@ -9,6 +9,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "hash_table.h"
 
@@ -206,6 +207,26 @@ hash_table_delete(struct hash_table_t *hash_table, const void *key)
                                         hash_table->key_deallocator,
                                         hash_table->value_deallocator);
 }
+
+unsigned int
+hash_table_string_hash(const void *str)
+{
+  unsigned int hash = 0;
+
+  /* overflow is ignored */
+  for (const char *p = (const char *) str; *p != '\0'; ++p) {
+    hash = hash * 31 + (unsigned long int) *p;
+  }
+
+  return hash;
+}
+
+bool
+hash_table_string_equal(const void *a, const void *b)
+{
+  return strcmp(a, b) == 0;
+}
+
 
 void
 list_free(struct list_t *list,
