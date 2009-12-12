@@ -15,6 +15,18 @@
 #include "fat32/fat.h"
 #include "fat32/utils.h"
 
+/**
+ * Finds an offset of the FAT entry corresponding to the specified cluster
+ * on the device.
+ *
+ * @param fat     FAT object.
+ * @param cluster Cluster number.
+ *
+ * @return Offset.
+ */
+static off_t
+fat32_fat_entry_offset(const struct fat32_fat_t *fat, uint32_t cluster);
+
 enum fat32_error_t
 fat32_fat_init(struct fat32_fat_t *fat,
                const struct fat32_fs_t *fs)
@@ -51,22 +63,29 @@ fat32_fat_finalize(struct fat32_fat_t *fat)
 /// a size in bytes of entry in file allocation table
 static const uint8_t  FAT32_FAT_ENTRY_SIZE = sizeof(fat32_fat_entry_t);
 
+off_t
+fat32_fat_entry_offset(const struct fat32_fat_t *fat, uint32_t cluster)
+{
+  /* an offset of the entry in a FAT corresponding to @em cluster */
+  uint32_t entry_fat_offset    = cluster * FAT32_FAT_ENTRY_SIZE;
+  uint32_t entry_sector        =
+    fat->bpb->reserved_sectors_count +
+    (entry_fat_offset / fat->bpb->bytes_per_sector);
+  uint32_t entry_sector_offset = entry_fat_offset % fat->bpb->bytes_per_sector;
+
+  return fat32_sector_offset_to_offset(fat->bpb,
+                                       entry_sector,
+                                       entry_sector_offset);
+}
+
 enum fat32_error_t
 fat32_fat_get_entry(const struct fat32_fat_t *fat,
                     uint32_t cluster, fat32_fat_entry_t *entry)
 {
-  /* an offset of the entry in a FAT corresponding to @em cluster */
-  uint32_t entry_fat_offset    = cluster * FAT32_FAT_ENTRY_SIZE;
-  uint32_t entry_sector        = fat->bpb->reserved_sectors_count + \
-    (entry_fat_offset / fat->bpb->bytes_per_sector);
-  uint32_t entry_sector_offset = entry_fat_offset % fat->bpb->bytes_per_sector;
+  off_t offset = fat32_fat_entry_offset(fat, cluster);
 
-  off_t file_offset = fat32_sector_offset_to_offset(fat->bpb,
-                                                    entry_sector,
-                                                    entry_sector_offset);
-
-  off_t ret = lseek(fat->fd, file_offset, SEEK_SET);
-  if (ret < (off_t) 0) {
+  off_t ret = lseek(fat->fd, offset, SEEK_SET);
+  if (ret == (off_t) -1) {
     return FE_ERRNO;
   }
 
