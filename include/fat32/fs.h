@@ -46,6 +46,8 @@ struct fat32_fs_t {
   struct fat32_fs_info_t *fs_info; /**< FSInfo */
   struct fat32_fat_t     *fat;     /**< FAT-related data */
 
+  struct hash_table_t    *file_table; /**< hash table containg information
+                                       * about open files */
   struct hash_table_t    *fh_table; /**< hash table containing open
                                        file handles and corresponding to them
                                        fs objects */
@@ -57,6 +59,7 @@ struct fat32_fs_t {
 
 /// filesystem parameters
 struct fat32_fs_params_t {
+  size_t file_table_size;     /**< a size of hash table for open files */
   size_t fh_table_size;       /**< a size of hash table for file handles  */
 };
 

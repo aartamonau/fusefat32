@@ -23,6 +23,7 @@
 #include "fat32/diriter.h"
 #include "fat32/fs_object.h"
 #include "fat32/fh.h"
+#include "fat32/file_info.h"
 #include "utils/files.h"
 
 /**
@@ -69,6 +70,10 @@ fat32_fs_cleanup(struct fat32_fs_t* fs)
         return -1;
       }
       free(fs->fat);
+    }
+
+    if (fs->file_table != NULL) {
+      hash_table_free(fs->file_table);
     }
 
     if (fs->fh_table != NULL) {
@@ -183,6 +188,15 @@ fat32_fs_open(const char *path, const struct fat32_fs_params_t *params,
   op_status = fat32_fat_init(fs->fat, fs);
   if (op_status != FE_OK) {
     error = op_status;
+    goto open_device_cleanup;
+  }
+
+  fs->file_table =
+    hash_table_create(params->file_table_size,
+                      hash_table_string_hash, hash_table_string_equal,
+                      (cloner_t) strdup, fat32_file_info_cloner,
+                      free, free);
+  if (fs->file_table == NULL) {
     goto open_device_cleanup;
   }
 

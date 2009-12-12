@@ -24,6 +24,7 @@
 #include "fat32/bpb.h"
 #include "fat32/fs.h"
 #include "fat32/fh.h"
+#include "fat32/file_info.h"
 #include "fat32/fs_object.h"
 #include "fat32/direntry.h"
 #include "fat32/diriter.h"
@@ -287,6 +288,21 @@ int fat32_open(const char *path, struct fuse_file_info *file_info)
           retcode = errno;
           goto fat32_open_cleanup;
         }
+
+        struct fat32_file_info_t *f32_file_info;
+        f32_file_info = hash_table_lookup(fs->file_table, path);
+        if (f32_file_info != NULL) {
+          f32_file_info->refs += 1;
+        } else {
+          /* as we supplied key cloner so it's valid to ignore const modifier
+           * of path variable */
+          if (hash_table_insert(fs->file_table, (void *) path, NULL) == NULL) {
+            hash_table_delete(fs->fh_table, &fh);
+            retcode = errno;
+            goto fat32_open_cleanup;
+          }
+        }
+
         return 0;
       }
     }
@@ -322,10 +338,18 @@ fat32_release(const char *path, struct fuse_file_info *file_info)
   struct fusefat32_context_t *ff_context =
     (struct fusefat32_context_t *) context->private_data;
   struct fat32_fs_t          *fs         = ff_context->fs;
+  struct fat32_file_info_t   *f32_file_info;
 
   /* TODO: file handle freeing */
 
   hash_table_delete(fs->fh_table, &file_info->fh);
+
+  f32_file_info = hash_table_lookup(fs->file_table, path);
+  assert( f32_file_info != NULL );
+
+  if (--f32_file_info->refs == 0) {
+    hash_table_delete(fs->file_table, path);
+  }
 
   return 0;
 }
