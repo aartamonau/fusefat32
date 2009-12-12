@@ -94,7 +94,7 @@ fat32_getattr(const char *path, struct stat *stbuf)
     case FE_ERRNO:
       return -errno;
     case FE_INVALID_DEV:
-      return -EBADF;
+      return -EINVAL;
     default:
       assert( false );
     }
@@ -136,7 +136,7 @@ fat32_readdir(const char *path, void *buffer, fuse_fill_dir_t filler,
     return -errno;
   case FE_INVALID_DEV:
     // possibly not the best choice
-    return -EBADF;
+    return -EINVAL;
   case FE_OK:
     /* all processing is done after the switch */
     break;
@@ -192,7 +192,7 @@ fat32_readdir(const char *path, void *buffer, fuse_fill_dir_t filler,
       retcode = -errno;
       goto cleanup;
     case FE_INVALID_DEV:
-      retcode = -EBADF;
+      retcode = -EINVAL;
       goto cleanup;
     case FE_OK:
       break;
@@ -295,7 +295,7 @@ int fat32_open(const char *path, struct fuse_file_info *file_info)
     case FE_ERRNO:
       return -errno;
     case FE_INVALID_DEV:
-      return -EBADF;
+      return -EINVAL;
     default:
       assert( false );
     }
@@ -396,7 +396,7 @@ fat32_read(const char *path, char *buffer, size_t size, off_t offset,
         return -errno;
       } else if (nread < to_read) {
         // invalid device again
-        return -EBADF;
+        return -EINVAL;
       }
       buffer  += nread;
       overall += nread;
@@ -413,7 +413,7 @@ fat32_read(const char *path, char *buffer, size_t size, off_t offset,
       case FE_CLUSTER_CHAIN_ENDED: /* this must not happen because
                                     * we decreased requested size to fit
                                     * in file */
-        return -EBADF;
+        return -EINVAL;
       default:
         assert( false );
       }
