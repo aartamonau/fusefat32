@@ -169,6 +169,39 @@ enum fat32_error_t
 fat32_direntry_mark_free(int fd, off_t offset);
 
 /**
+ * Flushes current state of direntry to the file system.
+ *
+ * @param direntry Directory entry.
+ * @param fd       File descriptor of device.
+ * @param offset   Global offset of direntry.
+ *
+ * @retval FE_OK
+ * @retval FE_ERRNO           IO error which didn't cause fs corruption.
+ * @retval FE_FS_INCONSISTENT Because of IO errors file system left in
+ *                            inconsistent state.
+ */
+enum fat32_error_t
+fat32_direntry_flush(const struct fat32_direntry_t *direntry,
+                     int fd, off_t offset);
+
+/**
+ * Makes a direntry reference no clusters (i.e. make the file described by
+ * direntry empty)
+ *
+ * @param direntry Directory entry.
+ * @param fd       File descriptor of device.
+ * @param offset   Global offset of direntry
+ *
+ * @retval FE_OK
+ * @retval FE_ERRNO           IO error which didn't cause fs corruption.
+ * @retval FE_FS_INCONSISTENT Because of IO errors file system left in
+ *                            inconsistent state.
+ */
+enum fat32_error_t
+fat32_direntry_make_empty(struct fat32_direntry_t *direntry,
+                          int fd, off_t offset);
+
+/**
  * Determines whether directory entry is dot or dotdot entry.
  *
  * @param direntry Directory entry to check.

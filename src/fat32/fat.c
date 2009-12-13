@@ -252,3 +252,13 @@ fat32_fat_mark_cluster_chain_free(struct fat32_fat_t *fat, uint32_t cluster)
     }
   }
 }
+
+enum fat32_error_t
+fat32_fat_mark_cluster_last(struct fat32_fat_t *fat, uint32_t cluster)
+{
+  if (fat32_fat_set_entry(fat, cluster, FAT32_FAT_ENTRY_EOC) == FE_ERRNO) {
+    return FE_FS_INCONSISTENT;
+  }
+
+  return FE_OK;
+}

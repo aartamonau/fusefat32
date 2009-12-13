@@ -8,6 +8,7 @@
  *
  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
@@ -111,6 +112,32 @@ fat32_direntry_mark_free(int fd, off_t offset)
   }
 
   return FE_OK;
+}
+
+enum fat32_error_t
+fat32_direntry_flush(const struct fat32_direntry_t *direntry,
+                     int fd, off_t offset)
+{
+  if (lseek(fd, offset, SEEK_SET) == (off_t) -1) {
+    return FE_ERRNO;
+  }
+
+  ssize_t nwritten = xwrite(fd, direntry, sizeof(struct fat32_direntry_t));
+  if (nwritten == -1) {
+    return FE_FS_INCONSISTENT;
+  }
+
+  return FE_OK;
+}
+
+enum fat32_error_t
+fat32_direntry_make_empty(struct fat32_direntry_t *direntry,
+                          int fd, off_t offset)
+{
+  assert( fat32_direntry_is_file(direntry) );
+
+  direntry->file_size = 0;
+  return fat32_direntry_flush(direntry, fd, offset);
 }
 
 bool

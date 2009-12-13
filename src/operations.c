@@ -9,6 +9,8 @@
  * @todo Name validation.
  * @todo Use new interface for readdir.
  * @todo Consistent error checking.
+ * @todo Move as much functionality as possible to fat32 specific files
+ *       (especially to fs_object.c).
  */
 
 #include <assert.h>
@@ -345,38 +347,32 @@ int fat32_open(const char *path, struct fuse_file_info *file_info)
         goto fat32_open_cleanup;
       }
 
-      /* TODO: writing */
-      if ((file_info->flags & O_ACCMODE) != O_RDONLY) {
-        retcode = -EPERM;
+      /* TODO: Think of adding yet another layer of indirection.
+       *       Possibly there must be mapping between paths and
+       *       and file handles. And then between path and fs objects.
+       */
+      file_info->fh = fh;
+      if (hash_table_insert(fs->fh_table, &fh, fs_object) == NULL) {
+        retcode = errno;
         goto fat32_open_cleanup;
-      } else {
+      }
 
-        /* TODO: Think of adding yet another layer of indirection.
-         *       Possibly there must be mapping between paths and
-         *       and file handles. And then between path and fs objects.
-         */
-        file_info->fh = fh;
-        if (hash_table_insert(fs->fh_table, &fh, fs_object) == NULL) {
+      struct fat32_file_info_t *f32_file_info;
+      f32_file_info = hash_table_lookup(fs->file_table, path);
+      if (f32_file_info != NULL) {
+        f32_file_info->refs += 1;
+      } else {
+        /* as we supplied key cloner so it's valid to ignore const modifier
+         * of path variable */
+        if (hash_table_insert(fs->file_table, (void *) path, NULL) == NULL) {
+          hash_table_delete(fs->fh_table, &fh);
           retcode = errno;
           goto fat32_open_cleanup;
         }
-
-        struct fat32_file_info_t *f32_file_info;
-        f32_file_info = hash_table_lookup(fs->file_table, path);
-        if (f32_file_info != NULL) {
-          f32_file_info->refs += 1;
-        } else {
-          /* as we supplied key cloner so it's valid to ignore const modifier
-           * of path variable */
-          if (hash_table_insert(fs->file_table, (void *) path, NULL) == NULL) {
-            hash_table_delete(fs->fh_table, &fh);
-            retcode = errno;
-            goto fat32_open_cleanup;
-          }
-        }
+      }
 
         return 0;
-      }
+
     }
   } else {
     switch (ret) {
@@ -631,6 +627,83 @@ fat32_rmdir(const char *path)
 
     retcode = 0;
     break;
+  default:
+    assert( false );
+  }
+
+cleanup:
+  fat32_fs_object_free(fs_object);
+  return retcode;
+}
+
+/**
+ * Truncation function for files that are not opened.
+ *
+ * @param path   A path to file.
+ * @param length Desired new length of file.
+ *
+ * @return Operation result.
+ */
+int
+fat32_truncate(char *path, off_t length)
+{
+  struct fuse_context        *context    = fuse_get_context();
+  struct fusefat32_context_t *ff_context =
+    (struct fusefat32_context_t *) context->private_data;
+  struct fat32_fs_t          *fs         = ff_context->fs;
+  struct fat32_fs_object_t   *fs_object  = NULL;
+
+  enum fat32_error_t ret = fat32_fs_get_object(fs,
+                                               path,
+                                               &fs_object, NULL);
+  int retcode;
+
+
+  switch (ret) {
+  case FE_OK:
+    break;
+  case FE_ERRNO:
+    return -errno;
+  case FE_INVALID_DEV:
+    log_error_loc(FUSEFAT32_INVALID_DEVICE_MSG);
+    return -EINVAL;
+  default:
+    assert( false );
+  }
+
+  if (fs_object == NULL) {
+    return -ENOENT;
+  }
+
+  if (fat32_fs_object_is_directory(fs_object)) {
+    retcode = -EISDIR;
+    goto cleanup;
+  }
+
+  ret = fat32_fs_object_truncate(fs_object, length);
+  switch (ret) {
+  case FE_OK:
+    retcode = 0;
+    goto cleanup;
+  case FE_ERRNO:
+    retcode = -errno;
+    goto cleanup;
+  case FE_INVALID_FS:
+    log_error_loc(FUSEFAT32_INVALID_FS_MSG);
+    retcode = -EINVAL;
+    goto cleanup;
+  case FE_INVALID_DEV:
+    log_error_loc(FUSEFAT32_INVALID_DEVICE_MSG);
+    retcode = -EINVAL;
+    goto cleanup;
+  case FE_FS_INCONSISTENT:
+    log_error_loc(FUSEFAT32_INCONSISTENT_FS_MSG);
+    retcode = -EINVAL;
+    goto cleanup;
+  case FE_FS_PARTIALLY_CONSISTENT:
+    log_error_loc(FUSEFAT32_PARTIALLY_INCONSISTENT_FS_MSG);
+    retcode = 0;
+    goto cleanup;
   default:
     assert( false );
   }

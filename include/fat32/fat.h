@@ -188,4 +188,17 @@ fat32_fat_find_free_cluster(struct fat32_fat_t *fat, uint32_t *cluster);
 enum fat32_error_t
 fat32_fat_mark_cluster_chain_free(struct fat32_fat_t *fat, uint32_t cluster);
 
+/**
+ * Marks a cluster to be the last in the cluster chain.
+ *
+ * @param fat     FAT object.
+ * @param cluster Cluster number.
+ *
+ * @retval FE_OK
+ * @retval FE_FS_INSONSISTENT File system left in inconsistent state due to IO
+ *                            error.
+ */
+enum fat32_error_t
+fat32_fat_mark_cluster_last(struct fat32_fat_t *fat, uint32_t cluster);
+
 #endif /* _FAT_H_ */

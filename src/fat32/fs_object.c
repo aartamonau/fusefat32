@@ -5,7 +5,7 @@
  *
  * @brief  File system objects' functionality implementation.
  *
- *
+ * @todo Split truncate function into several.
  */
 
 #include <stdlib.h>
@@ -220,4 +220,97 @@ fat32_fs_object_delete(struct fat32_fs_object_t *fs_object)
     }
   }
   return FE_OK;
+}
+
+enum fat32_error_t
+fat32_fs_object_truncate(struct fat32_fs_object_t *fs_object,
+                         uint32_t length)
+{
+  assert( fat32_fs_object_is_file(fs_object) );
+
+  const struct fat32_fs_t *fs      = fs_object->fs;
+  struct fat32_fat_t      *fat     = fs->fat;
+  uint32_t                 csize   = fs->cluster_size;
+  uint32_t                 fsize   = fat32_fs_object_size(fs_object);
+  uint32_t                 cluster = fat32_fs_object_first_cluster(fs_object);
+  uint32_t                 next;
+
+  /* number of cluster needed for the resized file */
+  uint32_t clusters = (length + csize - 1) / csize;
+
+
+  if (length < fsize) {
+    fat32_fat_entry_t entry;
+    enum fat32_error_t       ret;
+    if (clusters == 0) {
+      next = cluster;
+      ret = fat32_direntry_make_empty(fs_object->direntry, fs->fd,
+                                      fs_object->offset);
+      switch (ret) {
+      case FE_OK:
+        break;
+      case FE_ERRNO:
+      case FE_FS_INCONSISTENT:
+        return ret;
+      default:
+        assert( false );
+      }
+    } else {
+      ret = fat32_fat_get_nth_entry(fat, cluster, clusters - 1, &entry);
+      switch (ret) {
+      case FE_OK:
+        break;
+      case FE_ERRNO:
+      case FE_INVALID_DEV:
+      case FE_INVALID_FS:
+        return ret;
+      case FE_CLUSTER_CHAIN_ENDED:
+        /* by construction FE_CLUSTER_CHAIN_ENDED can't be returned */
+        return FE_INVALID_FS;
+      default:
+        assert( false );
+      }
+      cluster = fat32_fat_entry_to_cluster(entry);
+      ret     = fat32_fat_get_entry(fat, cluster, &entry);
+      switch (ret) {
+      case FE_OK:
+        break;
+      case FE_ERRNO:
+      case FE_INVALID_DEV:
+        return ret;
+      default:
+        assert( false );
+      }
+      next    = fat32_fat_entry_to_cluster(entry);
+
+      ret = fat32_fat_mark_cluster_last(fat, cluster);
+      switch (ret) {
+      case FE_OK:
+        break;
+      case FE_FS_INCONSISTENT:
+        return ret;
+      default:
+        assert( false );
+      }
+    }
+
+    ret = fat32_fat_mark_cluster_chain_free(fat, next);
+    switch (ret) {
+    case FE_OK:
+      return FE_OK;
+    case FE_ERRNO:
+    case FE_FS_INCONSISTENT:
+    case FE_INVALID_FS:
+      return FE_FS_PARTIALLY_CONSISTENT;
+    case FE_INVALID_DEV:
+      return FE_INVALID_DEV;
+    default:
+      assert( false );
+    }
+  } else if (length > fsize) {
+    assert( false );
+  } else {
+    /* length == fsize */
+    return FE_OK;
+  }
 }

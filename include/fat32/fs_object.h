@@ -233,4 +233,22 @@ fat32_fs_object_is_empty_file(const struct fat32_fs_object_t *fs_object)
 enum fat32_error_t
 fat32_fs_object_delete(struct fat32_fs_object_t *fs_object);
 
+/**
+ * Truncate a file represented by fs object.
+ *
+ * @param fs_object File system object representing file to truncate.
+ * @param length    Desired new length of a file.
+ *
+ * @retval FE_OK
+ * @retval FE_ERRNO           IO errors while working with device.
+ * @retval FE_FS_INCONSISTENT Due to IO error fs left in insonsistent state.
+ * @retval FE_INVALID_DEV     Invalid device.
+ * @retval FE_INVALID_FS      Invalid file system.
+ * @retval FE_FS_PARTIALLY_INCONSISTENT Due to IO error fs left in partially
+ *                                      inconsistent state.
+ */
+enum fat32_error_t
+fat32_fs_object_truncate(struct fat32_fs_object_t *fs_object,
+                         uint32_t offset);
+
 #endif /* _FS_OBJECT_H_ */
