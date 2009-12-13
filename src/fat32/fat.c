@@ -27,6 +27,20 @@
 static off_t
 fat32_fat_entry_offset(const struct fat32_fat_t *fat, uint32_t cluster);
 
+/**
+ * Sets a FAT entry of the cluster to the specified value.
+ *
+ * @param fat     FAT object.
+ * @param cluster Cluster number.
+ * @param entry   Desired FAT entry value.
+ *
+ * @retval FE_OK
+ * @retval FE_ERRNO
+ */
+static enum fat32_error_t
+fat32_fat_set_entry(const struct fat32_fat_t *fat,
+                    uint32_t cluster, fat32_fat_entry_t entry);
+
 enum fat32_error_t
 fat32_fat_init(struct fat32_fat_t *fat,
                const struct fat32_fs_t *fs)
@@ -182,4 +196,58 @@ fat32_fat_find_free_cluster(struct fat32_fat_t *fat, uint32_t *cluster)
     ++candidate;
   }
   return FE_FS_IS_FULL;
+}
+
+
+enum fat32_error_t
+fat32_fat_set_entry(const struct fat32_fat_t *fat,
+                    uint32_t cluster, fat32_fat_entry_t entry)
+{
+  off_t offset = fat32_fat_entry_offset(fat, cluster);
+
+  off_t ret = lseek(fat->fd, offset, SEEK_SET);
+  if (ret == (off_t) -1) {
+    return FE_ERRNO;
+  }
+
+  ssize_t nwritten = xwrite(fat->fd, &entry, FAT32_FAT_ENTRY_SIZE);
+  if (nwritten == -1) {
+    return FE_ERRNO;
+  }
+
+  return FE_OK;
+}
+
+/// one of the possible FAT entry values which marks cluster as free
+static const fat32_fat_entry_t FAT32_FAT_ENTRY_EMPTY = 0x00000000;
+
+enum fat32_error_t
+fat32_fat_mark_cluster_chain_free(struct fat32_fat_t *fat, uint32_t cluster)
+{
+  fat32_fat_entry_t  entry;
+  enum fat32_error_t ret;
+
+  while (true) {
+    ret = fat32_fat_get_entry(fat, cluster, &entry);
+
+    if (ret == FE_OK) {
+      if (fat32_fat_entry_is_free(entry) ||
+          fat32_fat_entry_is_bad(entry)) {
+        return FE_INVALID_FS;
+      }
+
+      fat32_fat_entry_t next = fat32_fat_entry_to_cluster(entry);
+      if (fat32_fat_set_entry(fat,
+                              cluster, FAT32_FAT_ENTRY_EMPTY) == FE_ERRNO) {
+        return FE_FS_INCONSISTENT;
+      }
+      cluster = next;
+
+      if (fat32_fat_entry_is_null(entry)) {
+        return FE_OK;
+      }
+    } else {
+      return ret;
+    }
+  }
 }

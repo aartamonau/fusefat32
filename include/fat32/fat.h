@@ -170,4 +170,22 @@ fat32_fat_entry_is_free(fat32_fat_entry_t entry);
 enum fat32_error_t
 fat32_fat_find_free_cluster(struct fat32_fat_t *fat, uint32_t *cluster);
 
+/**
+ * Marks all clusters in the cluster chain as free.
+ *
+ * @param fat     FAT object.
+ * @param cluster The first cluster in a chain.
+ *
+ * @retval FE_OK
+ * @retval FE_ERRNO @li @em lseek failed
+ *                  @li data can't be read from underlying device
+ * @retval FE_INVALID_DEV underlying device file ended prematurely
+ * @retval FE_FS_INCONSISTENT Because of IO errors during writing file system
+ *                              is left in inconsistent state. @em errno is
+ *                              set appropriately.
+ * @retval FE_INVALID_FS Bad or free cluster encountered in cluster chain.
+ */
+enum fat32_error_t
+fat32_fat_mark_cluster_chain_free(struct fat32_fat_t *fat, uint32_t cluster);
+
 #endif /* _FAT_H_ */
