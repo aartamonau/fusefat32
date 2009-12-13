@@ -101,16 +101,14 @@ xwrite(int fd, const void *buf, size_t count)
   while (nwritten < count) {
     ret = write(fd, buf, count);
 
-    if (ret > 0) {
+    if (ret >= 0) {
       nwritten += ret;
-    } else if (ret < 0) {
+    } else {
       if (errno == EINTR) {
         continue;
       } else {
         return ret;
       }
-    } else {
-      break;
     }
   }
 
