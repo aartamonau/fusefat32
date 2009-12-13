@@ -112,3 +112,12 @@ fat32_direntry_mark_free(int fd, off_t offset)
 
   return FE_OK;
 }
+
+bool
+fat32_direntry_is_dot(const struct fat32_direntry_t *direntry)
+{
+  bool dot    = direntry->name[0] == '.';
+  bool dotdot = dot && direntry->name[1] == '.';
+
+  return dot || dotdot;
+}

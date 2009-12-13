@@ -15,6 +15,8 @@
 #include "fat32/fs_object.h"
 #undef  EXTERN_INLINE_DEFINITIONS
 
+#include "fat32/diriter.h"
+
 struct fat32_fs_object_t *
 fat32_fs_object_root_dir(const struct fat32_fs_t *fs)
 {
@@ -155,4 +157,48 @@ fat32_fs_object_mark_free(const struct fat32_fs_object_t *fs_object)
   assert( !fat32_fs_object_is_root_directory(fs_object) );
 
   return fat32_direntry_mark_free(fs_object->fs->fd, fs_object->offset);
+}
+
+enum fat32_error_t
+fat32_fs_object_is_empty_directory(const struct fat32_fs_object_t *fs_object,
+                                   bool *result)
+{
+  assert( fat32_fs_object_is_directory(fs_object) );
+
+  struct fat32_diriter_t *diriter = fat32_diriter_create(fs_object, false);
+  if (diriter == NULL) {
+    return FE_ERRNO;
+  }
+
+  struct fat32_fs_object_t *child;
+  enum fat32_error_t ret = fat32_diriter_next(diriter, &child);
+  if (ret != FE_OK) {
+    return ret;
+  }
+
+  if (child == NULL) {
+    *result = true;
+  } else {
+    *result = false;
+    fat32_fs_object_free(child);
+  }
+
+  return FE_OK;
+}
+
+enum fat32_error_t
+fat32_fs_object_delete(struct fat32_fs_object_t *fs_object)
+{
+  struct fat32_fat_t *fat = fs_object->fs->fat;
+
+  uint32_t cluster = fat32_fs_object_first_cluster(fs_object);
+  if (fat32_fs_object_mark_free(fs_object) == FE_ERRNO) {
+    return FE_ERRNO;
+  }
+
+  enum fat32_error_t ret = fat32_fat_mark_cluster_chain_free(fat, cluster);
+  if (ret != FE_OK) {
+    return FE_FS_PARTIALLY_CONSISTENT;
+  }
+  return FE_OK;
 }

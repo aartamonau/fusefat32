@@ -294,7 +294,7 @@ fat32_fs_get_object(const struct fat32_fs_t *fs,
   }
 
   while (token != NULL) {
-    diriter = fat32_diriter_create(parent_object);
+    diriter = fat32_diriter_create(parent_object, true);
 
     if (diriter == NULL) {
       goto cleanup;

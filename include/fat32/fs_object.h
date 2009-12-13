@@ -12,6 +12,7 @@
 #define _FS_OBJECT_H_
 
 #include <assert.h>
+#include <stdbool.h>
 
 #include <inttypes.h>
 
@@ -179,9 +180,42 @@ fat32_fs_object_size(const struct fat32_fs_object_t *fs_object)
  * @param fs_object File system object.
  *
  * @retval FE_OK
- * @retval FE_ERRNO
+ * @retval FE_ERRNO IO errors while working with device.
  */
 enum fat32_error_t
 fat32_fs_object_mark_free(const struct fat32_fs_object_t *fs_object);
+
+/**
+ * Checks whether a directory represented by fs object is empty.
+ *
+ * @param      fs_object File system object corresponding to the directory to
+ *                  check.
+ * @param[out] result    Result of the check.
+ *
+ * @retval FE_OK
+ * @retval FE_ERRNO       IO errors while working with device.
+ * @retval FE_INVALID_DEV Device ended prematurely.
+
+ */
+enum fat32_error_t
+fat32_fs_object_is_empty_directory(const struct fat32_fs_object_t *fs_object,
+                                   bool *result);
+
+/**
+ * Deletes a fs object from the file system. Both files and non-root directories
+ * can be deleted. But no checks are performed to make sure that it is valid to
+ * delete the object (for instance, it's not valid to delete non-empty
+ * directory).
+ *
+ * @param fs_object File system object.
+ *
+ * @retval FE_OK
+ * @retval FE_ERRNO IO errors while working with device.
+ * @retval FE_FS_PARTIALLY_CONSISTENT Directory entry has been deleted
+ *                                    successfully but clusters have not been
+ *                                    freed due to IO errors.
+ */
+enum fat32_error_t
+fat32_fs_object_delete(struct fat32_fs_object_t *fs_object);
 
 #endif /* _FS_OBJECT_H_ */

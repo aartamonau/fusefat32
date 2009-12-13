@@ -163,9 +163,19 @@ fat32_direntry_short_name(const struct fat32_direntry_t *direntry);
  * @param offset Global offset.
  *
  * @retval FE_OK
- * @retval FE_ERRNO
+ * @retval FE_ERRNO IO errors while working with device.
  */
 enum fat32_error_t
 fat32_direntry_mark_free(int fd, off_t offset);
+
+/**
+ * Determines whether directory entry is dot or dotdot entry.
+ *
+ * @param direntry Directory entry to check.
+ *
+ * @return Value indicating whether directory entry is dot or dotdot.
+ */
+bool
+fat32_direntry_is_dot(const struct fat32_direntry_t *direntry);
 
 #endif /* _DIRENTRY_H_ */

@@ -18,7 +18,8 @@
 #include "fat32/utils.h"
 
 struct fat32_diriter_t *
-fat32_diriter_create(const struct fat32_fs_object_t *fs_object)
+fat32_diriter_create(const struct fat32_fs_object_t *fs_object,
+                     bool list_dots)
 {
   assert( (fs_object->type == FAT32_FS_OBJECT_DIR) ||
           (fs_object->type == FAT32_FS_OBJECT_ROOT_DIR) );
@@ -33,6 +34,7 @@ fat32_diriter_create(const struct fat32_fs_object_t *fs_object)
   diriter->fs           = fs_object->fs;
   diriter->cluster      = fat32_fs_object_first_cluster(fs_object);
   diriter->offset       = 0;
+  diriter->list_dots    = list_dots;
 
   return diriter;
 }
@@ -40,20 +42,28 @@ fat32_diriter_create(const struct fat32_fs_object_t *fs_object)
 /**
  * Checks whether directory entry is of interest for ::fat32_diriter_next.
  *
- * @param direntry directory entry
+ * @param direntry  Directory entry.
+ * @param list_dots Specifies whether to treat dot and dotdot as suitable
+ *        entries.
  *
  * @return boolean result
  */
 static bool
-suitable_direntry(const struct fat32_direntry_t *direntry)
+suitable_direntry(const struct fat32_direntry_t *direntry,
+                  bool list_dots)
 {
   if (fat32_direntry_is_last(direntry)) {
     return true;
   }
 
-  return (!fat32_direntry_is_empty(direntry) &&
-          (fat32_direntry_is_directory(direntry) ||
-           fat32_direntry_is_file(direntry)));
+  bool result = (!fat32_direntry_is_empty(direntry) &&
+                 (fat32_direntry_is_directory(direntry) ||
+                  fat32_direntry_is_file(direntry)));
+  if (list_dots) {
+    return result;
+  } else {
+    return result && !fat32_direntry_is_dot(direntry);
+  }
 }
 
 enum fat32_error_t
@@ -112,7 +122,7 @@ fat32_diriter_next(struct fat32_diriter_t    *diriter,
 
     diriter->offset += sizeof(struct fat32_direntry_t);
 
-  } while (!suitable_direntry(&direntry));
+  } while (!suitable_direntry(&direntry, diriter->list_dots));
 
   if (fat32_direntry_is_last(&direntry)) {
     diriter->cluster = 0;

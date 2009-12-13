@@ -27,8 +27,12 @@ enum fat32_error_t {
                                    the given file system */
   FE_CLUSTER_CHAIN_ENDED,       /**< cluster chain ended prematurely */
   FE_FS_IS_FULL,                /**< no free space on the file system */
-  FE_FS_INCONSISTENT            /**< returned when because of IO errors file
+  FE_FS_INCONSISTENT,            /**< returned when because of IO errors file
                                  * system is left in inconsistent state. */
+  FE_FS_PARTIALLY_CONSISTENT    /**< file system is in the state in which
+                                 * it can be used without visible problems
+                                 * but fsck needed to make it strictly
+                                 * consistent */
 };
 
 #endif /* _FAT32_ERRORS_H_ */

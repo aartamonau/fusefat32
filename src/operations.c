@@ -7,6 +7,8 @@
  *
  * @todo Make code checking #fat32_error_t result of some operation consistent.
  * @todo Name validation.
+ * @todo Use new interface for readdir.
+ * @todo Consistent error checking.
  */
 
 #include <assert.h>
@@ -18,6 +20,8 @@
 
 #include "operations.h"
 #include "context.h"
+
+#include "i18n.h"
 
 #include "utils/log.h"
 #include "utils/files.h"
@@ -60,6 +64,7 @@ fs_object_attrs(const struct fat32_fs_object_t *fs_object,
   }
 }
 
+
 /**
  * Actually deletes a file under assumption that it's not open.
  *
@@ -68,7 +73,7 @@ fs_object_attrs(const struct fat32_fs_object_t *fs_object,
  *
  * @return Operation result.
  */
-int
+static int
 fat32_perform_unlink(struct fat32_fs_t *fs, const char *path)
 {
   struct fat32_fs_object_t *fs_object;
@@ -93,25 +98,31 @@ fat32_perform_unlink(struct fat32_fs_t *fs, const char *path)
   }
 
   if (fat32_fs_object_is_directory(fs_object)) {
-    return -EISDIR;
-  }
-
-  uint32_t cluster = fat32_fs_object_first_cluster(fs_object);
-  if (fat32_fs_object_mark_free(fs_object) == FE_ERRNO) {
-    retcode = -errno;
+    retcode = -EISDIR;
     goto cleanup;
   }
 
-  ret = fat32_fat_mark_cluster_chain_free(fs_object->fs->fat, cluster);
-  if (ret != FE_OK) {
+  ret = fat32_fs_object_delete(fs_object);
+  switch (ret) {
+  case FE_OK:
+    retcode = 0;
+    break;
+  case FE_ERRNO:
+    retcode = -errno;
+    break;
+  case FE_FS_PARTIALLY_CONSISTENT:
     /* As direnty is already marked as free generally we can only say that
      * operation has completed successfully and log the error. Actually, the
      * file system will be in a usable state after this but some clusters won't
-     * be used before fsck will have been performed. */
-    log_error("fat32_perform_unlink: unable to free cluster chain. Run fsck "
-              "to fix the problem");
+     * be used before fsck is performed. */
+    log_error(_("fat32_perform_unlink: unable to free cluster chain. "
+                "Some of the clusters won't be used before you run fsck."));
+
+    retcode = 0;
+    break;
+  default:
+    assert( false );
   }
-  retcode = FE_OK;
 
 cleanup:
   fat32_fs_object_free(fs_object);
@@ -234,7 +245,7 @@ fat32_readdir(const char *path, void *buffer, fuse_fill_dir_t filler,
     }
   }
 
-  diriter = fat32_diriter_create(fs_object);
+  diriter = fat32_diriter_create(fs_object, true);
   if (diriter == NULL) {
     retcode = -errno;
     goto cleanup;
@@ -532,6 +543,97 @@ fat32_unlink(const char *path)
   }
 }
 
+/**
+ * Implements @em rmdir system call
+ *
+ * @param path A path to directory.
+ *
+ * @return Operation result.
+ */
+int
+fat32_rmdir(const char *path)
+{
+  struct fuse_context        *context    = fuse_get_context();
+  struct fusefat32_context_t *ff_context =
+    (struct fusefat32_context_t *) context->private_data;
+  struct fat32_fs_t          *fs         = ff_context->fs;
+
+  struct fat32_fs_object_t *fs_object;
+  enum fat32_error_t        ret =
+    fat32_fs_get_object(fs, path, &fs_object, NULL);
+
+  int retcode;
+
+  switch (ret) {
+  case FE_OK:
+    break;
+  case FE_ERRNO:
+    return -errno;
+  case FE_INVALID_DEV:
+    return -EINVAL;
+  default:
+    assert( false );
+  }
+
+  if (fs_object == NULL) {
+    return -ENOENT;
+  }
+
+  if (fat32_fs_object_is_file(fs_object)) {
+    retcode = -ENOTDIR;
+    goto cleanup;
+  }
+
+  if (fat32_fs_object_is_root_directory(fs_object)) {
+    retcode = -EPERM;
+    goto cleanup;
+  }
+
+  bool empty;
+  ret = fat32_fs_object_is_empty_directory(fs_object, &empty);
+
+  switch (ret) {
+  case FE_OK:
+    break;
+  case FE_ERRNO:
+    retcode = -errno;
+    goto cleanup;
+  case FE_INVALID_DEV:
+    retcode = -EINVAL;
+    goto cleanup;
+  default:
+    assert( false );
+  }
+
+  if (!empty) {
+    retcode = -ENOTEMPTY;
+    goto cleanup;
+  }
+
+  ret = fat32_fs_object_delete(fs_object);
+  switch (ret) {
+  case FE_OK:
+    retcode = 0;
+    goto cleanup;
+  case FE_ERRNO:
+    retcode = -errno;
+    goto cleanup;
+  case FE_FS_PARTIALLY_CONSISTENT:
+    /* look at the comment in ::fat32_perform_unlink function */
+    log_error(_("fat32_rmdir: unable to free cluster chain. "
+                "Some of the clusters won't be used before you run fsck."));
+
+    retcode = 0;
+    break;
+  default:
+    assert( false );
+  }
+
+cleanup:
+  fat32_fs_object_free(fs_object);
+  return retcode;
+}
+
 const struct fuse_operations fusefat32_operations = {
   .readdir = fat32_readdir,
   .getattr = fat32_getattr,
@@ -539,4 +641,5 @@ const struct fuse_operations fusefat32_operations = {
   .release = fat32_release,
   .read    = fat32_read,
   .unlink  = fat32_unlink,
+  .rmdir   = fat32_rmdir,
 };

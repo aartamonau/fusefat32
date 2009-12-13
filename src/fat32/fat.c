@@ -10,6 +10,7 @@
 #include <unistd.h>
 
 #include "utils/files.h"
+#include "utils/log.h"
 
 #include "fat32/fs.h"
 #include "fat32/fat.h"

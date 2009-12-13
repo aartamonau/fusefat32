@@ -11,6 +11,7 @@
 #ifndef _DIRITER_H_
 #define _DIRITER_H_
 
+#include <stdbool.h>
 #include <inttypes.h>
 
 #include "fat32/fs.h"
@@ -26,19 +27,24 @@ struct fat32_diriter_t {
                                             nothing to iterate. */
   uint32_t                 offset;       /**< Offset of the next item in cluster
                                             to iterate. */
+  bool                     list_dots;    /**< Indicates whether dot and dotdot
+                                          * entries must be listed by iterator.
+                                          * */
 };
 
 /**
  * Creates a directory iterator from #fat32_fs_object_t.
  * Asserts that @em fs_object is directory or root directory.
  *
- * @param fs_object file system object
+ * @param fs_object File system object.
+ * @param list_dots Specifies whether dot and dotdot entries must be listed.
  *
- * @return directory iterator
- * @retval NULL Error occured. Error is specified by @em errno.
+ * @return Directory iterator. NULL is returned on error and @em errno is set
+ *         appropriately.
  */
 struct fat32_diriter_t *
-fat32_diriter_create(const struct fat32_fs_object_t *fs_object);
+fat32_diriter_create(const struct fat32_fs_object_t *fs_object,
+                     bool list_dots);
 
 /**
  * Finds next object in the iterator.
