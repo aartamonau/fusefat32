@@ -196,9 +196,17 @@ fat32_fs_object_delete(struct fat32_fs_object_t *fs_object)
     return FE_ERRNO;
   }
 
-  enum fat32_error_t ret = fat32_fat_mark_cluster_chain_free(fat, cluster);
-  if (ret != FE_OK) {
-    return FE_FS_PARTIALLY_CONSISTENT;
+  if (!(fat32_fs_object_is_file(fs_object) &&
+        fat32_fs_object_is_empty_file(fs_object))) {
+    enum fat32_error_t ret = fat32_fat_mark_cluster_chain_free(fat, cluster);
+    if (ret != FE_OK) {
+      /* We treat FE_FS_INCONSISTENT that can be returned by
+       * ::fat32_fat_mark_cluster_chain_free as FE_FS_PARTIALLY_CONSISTENT
+       * state. It's because in such situation some FAT entry has not been
+       * set correctly but its corresponding cluster is not referenced by any
+       * directory entry. */
+      return FE_FS_PARTIALLY_CONSISTENT;
+    }
   }
   return FE_OK;
 }

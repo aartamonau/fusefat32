@@ -202,6 +202,21 @@ fat32_fs_object_is_empty_directory(const struct fat32_fs_object_t *fs_object,
                                    bool *result);
 
 /**
+ * Checks whether a file represented by file system object is empty.
+ *
+ * @param fs_object File system object representing the file.
+ *
+ * @return Result of check.
+ */
+INLINE bool
+fat32_fs_object_is_empty_file(const struct fat32_fs_object_t *fs_object)
+{
+  assert( fat32_fs_object_is_file(fs_object) );
+
+  return fs_object->direntry->file_size == 0;
+}
+
+/**
  * Deletes a fs object from the file system. Both files and non-root directories
  * can be deleted. But no checks are performed to make sure that it is valid to
  * delete the object (for instance, it's not valid to delete non-empty
