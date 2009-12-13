@@ -9,17 +9,29 @@
  */
 
 #include <stdlib.h>
+#include <stddef.h>
 #include <string.h>
+
+#include <sys/types.h>
+#include <unistd.h>
+
+#include "utils/files.h"
 
 #define EXTERN_INLINE_DEFINITIONS
 #include "fat32/direntry.h"
+
+/// a marker of free direntry
+static const uint8_t EMPTY = 0xe5;
+
+/// a marker of last direntry
+static const uint8_t LAST  = 0x00;
 
 bool
 fat32_direntry_is_empty(const struct fat32_direntry_t *direntry)
 {
   const uint8_t *name = direntry->name;
 
-  return (name[0] == 0xe5 || name[0] == 0x00);
+  return (name[0] == EMPTY || name[0] == LAST);
 }
 
 bool
@@ -27,7 +39,7 @@ fat32_direntry_is_last(const struct fat32_direntry_t *direntry)
 {
   const uint8_t *name = direntry->name;
 
-  return (name[0] == 0x00);
+  return (name[0] == LAST);
 }
 
 /// ASCII-code of space
@@ -79,4 +91,24 @@ fat32_direntry_short_name(const struct fat32_direntry_t *direntry)
   }
 
   return result;
+}
+
+enum fat32_error_t
+fat32_direntry_mark_free(int fd, off_t offset)
+{
+  const off_t inner_offset = offsetof(struct fat32_direntry_t, name[0]);
+  offset += inner_offset;
+
+  if (lseek(fd, offset, SEEK_SET) == (off_t) -1) {
+    return FE_ERRNO;
+  }
+
+  ssize_t nwritten = xwrite(fd, &EMPTY, sizeof(uint8_t));
+  if (nwritten == -1) {
+    /* As sizeof(typeof(EMPTY)) is 1 we can assume that nothing is written when
+     * error occurs */
+    return FE_ERRNO;
+  }
+
+  return FE_OK;
 }

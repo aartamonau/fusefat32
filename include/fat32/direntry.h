@@ -156,4 +156,16 @@ fat32_direntry_is_directory(const struct fat32_direntry_t *direntry)
 char *
 fat32_direntry_short_name(const struct fat32_direntry_t *direntry);
 
+/**
+ * Marks a direntry with the given offset as empty.
+ *
+ * @param fd     File descriptor of device.
+ * @param offset Global offset.
+ *
+ * @retval FE_OK
+ * @retval FE_ERRNO
+ */
+enum fat32_error_t
+fat32_direntry_mark_free(int fd, off_t offset);
+
 #endif /* _DIRENTRY_H_ */

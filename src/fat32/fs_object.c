@@ -29,6 +29,7 @@ fat32_fs_object_root_dir(const struct fat32_fs_t *fs)
   fs_object->name     = NULL;
   fs_object->direntry = NULL;
   fs_object->fs       = fs;
+  fs_object->offset   = 0;
 
   return fs_object;
 }
@@ -36,7 +37,7 @@ fat32_fs_object_root_dir(const struct fat32_fs_t *fs)
 struct fat32_fs_object_t *
 fat32_fs_object_direntry(const struct fat32_fs_t       *fs,
                          const struct fat32_direntry_t *direntry,
-                         const char *name)
+                         const char *name, off_t offset)
 {
   struct fat32_fs_object_t *fs_object;
 
@@ -54,6 +55,7 @@ fat32_fs_object_direntry(const struct fat32_fs_t       *fs,
   fs_object->name     = NULL;
   fs_object->direntry = NULL;
   fs_object->fs       = fs;
+  fs_object->offset   = offset;
 
   fs_object->name     = strdup(name);
   if (fs_object->name == NULL) {
@@ -145,4 +147,12 @@ fs_object_allocator_cleanup:
   }
 
   return NULL;
+}
+
+enum fat32_error_t
+fat32_fs_object_mark_free(const struct fat32_fs_object_t *fs_object)
+{
+  assert( !fat32_fs_object_is_root_directory(fs_object) );
+
+  return fat32_direntry_mark_free(fs_object->fs->fd, fs_object->offset);
 }

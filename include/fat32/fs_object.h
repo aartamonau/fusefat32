@@ -15,6 +15,8 @@
 
 #include <inttypes.h>
 
+#include "fat32/errors.h"
+
 #define REIMPORT_INLINES
 #include "fat32/fs.h"
 #include "fat32/direntry.h"
@@ -48,6 +50,10 @@ struct fat32_fs_object_t {
   uint32_t                    last_cluster_number; /**< a number of the last
                                                     * accessed cluster in the
                                                     * file's cluster chain */
+  off_t                       offset; /**< An offset of the directory entry
+                                       * corresponding to the object. Makes
+                                       * sense only if fs obect has been created
+                                       * from directory entry. */
 };
 
 /**
@@ -72,6 +78,7 @@ fat32_fs_object_root_dir(const struct fat32_fs_t *fs);
  * @param name A name of fs object. Generally it's impossible to determine the
  *             name only from directory entry that's why it's picked to
  *             parameters list.
+ * @param offset A global offset of the provided directory entry.
  *
  * @return File system object is returned in case of success. In case
  *         of errors @em NULL is returned and @em errno is set appropriately.
@@ -79,7 +86,9 @@ fat32_fs_object_root_dir(const struct fat32_fs_t *fs);
 struct fat32_fs_object_t *
 fat32_fs_object_direntry(const struct fat32_fs_t       *fs,
                          const struct fat32_direntry_t *direntry,
-                         const char *name);
+                         const char *name, off_t offset);
+
+
 
 /**
  * Deallocates all memory held by file system object.
@@ -138,7 +147,6 @@ fat32_fs_object_is_root_directory(const struct fat32_fs_object_t *fs_object)
   return fs_object->type == FAT32_FS_OBJECT_ROOT_DIR;
 }
 
-
 /**
  * A cloner for fs objects to use with hash tables.
  *
@@ -163,5 +171,17 @@ fat32_fs_object_size(const struct fat32_fs_object_t *fs_object)
 
   return fs_object->direntry->file_size;
 }
+
+/**
+ * Marks a direntry in the directory containing object as free. Does not
+ * free a cluster chain which object occupies.
+ *
+ * @param fs_object File system object.
+ *
+ * @retval FE_OK
+ * @retval FE_ERRNO
+ */
+enum fat32_error_t
+fat32_fs_object_mark_free(const struct fat32_fs_object_t *fs_object);
 
 #endif /* _FS_OBJECT_H_ */
