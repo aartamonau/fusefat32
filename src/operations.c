@@ -110,6 +110,9 @@ fat32_perform_unlink(struct fat32_fs_t *fs, const char *path)
   case FE_ERRNO:
     retcode = -errno;
     break;
+  case FE_INVALID_DEV:
+    retcode = -EINVAL;
+    break;
   case FE_FS_PARTIALLY_CONSISTENT:
     /* As direnty is already marked as free generally we can only say that
      * operation has completed successfully and log the error. Actually, the
@@ -617,6 +620,9 @@ fat32_rmdir(const char *path)
     goto cleanup;
   case FE_ERRNO:
     retcode = -errno;
+    goto cleanup;
+  case FE_INVALID_DEV:
+    retcode = -EINVAL;
     goto cleanup;
   case FE_FS_PARTIALLY_CONSISTENT:
     /* look at the comment in ::fat32_perform_unlink function */

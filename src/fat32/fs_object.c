@@ -190,22 +190,33 @@ enum fat32_error_t
 fat32_fs_object_delete(struct fat32_fs_object_t *fs_object)
 {
   struct fat32_fat_t *fat = fs_object->fs->fat;
+  enum fat32_error_t  ret;
 
   uint32_t cluster = fat32_fs_object_first_cluster(fs_object);
-  if (fat32_fs_object_mark_free(fs_object) == FE_ERRNO) {
-    return FE_ERRNO;
+  ret = fat32_fs_object_mark_free(fs_object);
+  if (ret != FE_OK) {
+    return ret;
   }
 
   if (!(fat32_fs_object_is_file(fs_object) &&
         fat32_fs_object_is_empty_file(fs_object))) {
     enum fat32_error_t ret = fat32_fat_mark_cluster_chain_free(fat, cluster);
-    if (ret != FE_OK) {
-      /* We treat FE_FS_INCONSISTENT that can be returned by
+    switch (ret) {
+    case FE_OK:
+      break;
+    case FE_ERRNO:
+    case FE_FS_INCONSISTENT:
+    case FE_INVALID_FS:
+       /* We treat FE_FS_INCONSISTENT that can be returned by
        * ::fat32_fat_mark_cluster_chain_free as FE_FS_PARTIALLY_CONSISTENT
        * state. It's because in such situation some FAT entry has not been
        * set correctly but its corresponding cluster is not referenced by any
-       * directory entry. */
+       * directory entry. So we do for FE_INVALID_FS error. */
       return FE_FS_PARTIALLY_CONSISTENT;
+    case FE_INVALID_DEV:
+      return FE_INVALID_DEV;
+    default:
+      assert( false );
     }
   }
   return FE_OK;

@@ -195,7 +195,6 @@ fat32_fs_object_mark_free(const struct fat32_fs_object_t *fs_object);
  * @retval FE_OK
  * @retval FE_ERRNO       IO errors while working with device.
  * @retval FE_INVALID_DEV Device ended prematurely.
-
  */
 enum fat32_error_t
 fat32_fs_object_is_empty_directory(const struct fat32_fs_object_t *fs_object,
@@ -226,6 +225,7 @@ fat32_fs_object_is_empty_file(const struct fat32_fs_object_t *fs_object)
  *
  * @retval FE_OK
  * @retval FE_ERRNO IO errors while working with device.
+ * @retval FE_INVALID_DEV Device ended prematurely.
  * @retval FE_FS_PARTIALLY_CONSISTENT Directory entry has been deleted
  *                                    successfully but clusters have not been
  *                                    freed due to IO errors.
