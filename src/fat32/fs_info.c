@@ -49,8 +49,8 @@ fat32_fs_info_verbose_info(const struct fat32_fs_info_t *fs_info)
                       fs_info->struct_signature) );
   CHECK_NN( log_debug("\tTrail signature: %#" PRIx32,
                       fs_info->trail_signature) );
-  CHECK_NN( log_debug("\tLast known free cluster: %#" PRIu32,
-                      fs_info->last_free_cluster) );
+  CHECK_NN( log_debug("\tLast known free cluster count: %#" PRIu32,
+                      fs_info->last_free_count) );
   CHECK_NN( log_debug("\tFree cluster hint: %#" PRIu32,
                       fs_info->free_cluster_hint) );
 

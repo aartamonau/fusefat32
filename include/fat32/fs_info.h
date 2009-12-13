@@ -30,7 +30,7 @@ struct fat32_fs_info_t {
   uint8_t  reserved1[FS_INFO_RESERVED_BLOCK1_SIZE]; /**< reserved for
                                                        future expansion */
   uint32_t struct_signature;    /**< yet another validating signature */
-  uint32_t last_free_cluster;   /**< last known free cluster count
+  uint32_t last_free_count;   /**< last known free cluster count
                                    (0xffffffff means that it's unknown) */
   uint32_t free_cluster_hint;   /**< a hint showing from which cluster we
                                    should search for free one
