@@ -51,9 +51,9 @@ suitable_direntry(const struct fat32_direntry_t *direntry)
     return true;
   }
 
-  return ( fat32_direntry_is_file(direntry) ||
-           fat32_direntry_is_directory(direntry) ||
-           fat32_direntry_is_empty(direntry));
+  return (!fat32_direntry_is_empty(direntry) &&
+          (fat32_direntry_is_directory(direntry) ||
+           fat32_direntry_is_file(direntry)));
 }
 
 enum fat32_error_t
@@ -64,6 +64,7 @@ fat32_diriter_next(struct fat32_diriter_t    *diriter,
 
   struct fat32_direntry_t  direntry;
   const struct fat32_fs_t *fs = diriter->fs;
+  off_t offset;
 
   /* returned when there are no more fs objects */
   *fs_object = NULL;
@@ -96,7 +97,7 @@ fat32_diriter_next(struct fat32_diriter_t    *diriter,
     }
 
     off_t cluster_offset = fat32_cluster_to_offset(fs->bpb, diriter->cluster);
-    off_t offset         = cluster_offset + diriter->offset;
+    offset               = cluster_offset + diriter->offset;
 
     if (lseek(fs->fd, offset, SEEK_SET) == (off_t) -1) {
       return FE_ERRNO;
@@ -120,7 +121,7 @@ fat32_diriter_next(struct fat32_diriter_t    *diriter,
 
   /* TODO: long names */
   char *direntry_name = fat32_direntry_short_name(&direntry);
-  *fs_object = fat32_fs_object_direntry(fs, &direntry, direntry_name);
+  *fs_object = fat32_fs_object_direntry(fs, &direntry, direntry_name, offset);
   free(direntry_name);
 
   return FE_OK;
