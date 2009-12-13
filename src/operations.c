@@ -22,6 +22,7 @@
 #include "context.h"
 
 #include "i18n.h"
+#include "error_messages.h"
 
 #include "utils/log.h"
 #include "utils/files.h"
@@ -88,6 +89,7 @@ fat32_perform_unlink(struct fat32_fs_t *fs, const char *path)
   case FE_ERRNO:
     return -errno;
   case FE_INVALID_DEV:
+    log_error_loc(FUSEFAT32_INVALID_DEVICE_MSG);
     return -EINVAL;
   default:
     assert( false );
@@ -118,8 +120,7 @@ fat32_perform_unlink(struct fat32_fs_t *fs, const char *path)
      * operation has completed successfully and log the error. Actually, the
      * file system will be in a usable state after this but some clusters won't
      * be used before fsck is performed. */
-    log_error(_("fat32_perform_unlink: unable to free cluster chain. "
-                "Some of the clusters won't be used before you run fsck."));
+    log_error_loc(FUSEFAT32_PARTIALLY_INCONSISTENT_FS_MSG);
 
     retcode = 0;
     break;
@@ -626,8 +627,7 @@ fat32_rmdir(const char *path)
     goto cleanup;
   case FE_FS_PARTIALLY_CONSISTENT:
     /* look at the comment in ::fat32_perform_unlink function */
-    log_error(_("fat32_rmdir: unable to free cluster chain. "
-                "Some of the clusters won't be used before you run fsck."));
+    log_error_loc(FUSEFAT32_PARTIALLY_INCONSISTENT_FS_MSG);
 
     retcode = 0;
     break;
