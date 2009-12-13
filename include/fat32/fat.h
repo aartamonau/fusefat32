@@ -6,7 +6,7 @@
  * @brief  Functions and data structures needed to work with file allocation
  *         tables.
  *
- *
+ * @todo FAT sychronization.
  */
 
 #ifndef _FAT_H_
