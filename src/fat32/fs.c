@@ -265,15 +265,16 @@ fat32_fs_read_cluster(const struct fat32_fs_t *fs, void *buffer,
 enum fat32_error_t
 fat32_fs_get_object(const struct fat32_fs_t *fs,
                     const char *path,
-                    struct fat32_fs_object_t **fs_object)
+                    struct fat32_fs_object_t **fs_object,
+                    struct fat32_fs_object_t **parent)
 {
   char *path_copy = NULL;
   char *saveptr;
   char *token;
   char *str;
   enum fat32_error_t return_code = FE_ERRNO;
-  struct fat32_fs_object_t *parent  = NULL;
-  struct fat32_diriter_t   *diriter = NULL;
+  struct fat32_fs_object_t *parent_object  = NULL;
+  struct fat32_diriter_t   *diriter        = NULL;
 
   path_copy = strdup(path);
   if (path_copy == NULL) {
@@ -283,13 +284,17 @@ fat32_fs_get_object(const struct fat32_fs_t *fs,
   str = path_copy;
   token = strtok_r(str, "/", &saveptr);
 
-  parent = fat32_fs_object_root_dir(fs);
-  if (parent == NULL) {
+  parent_object = fat32_fs_object_root_dir(fs);
+  if (parent_object == NULL) {
     goto cleanup;
   }
 
+  if (parent != NULL) {
+    *parent = NULL;
+  }
+
   while (token != NULL) {
-    diriter = fat32_diriter_create(parent);
+    diriter = fat32_diriter_create(parent_object);
 
     if (diriter == NULL) {
       goto cleanup;
@@ -325,18 +330,26 @@ fat32_fs_get_object(const struct fat32_fs_t *fs,
     fat32_diriter_free(diriter);
     diriter = NULL;
 
-    fat32_fs_object_free(parent);
+    if (parent == NULL) {
+      fat32_fs_object_free(parent_object);
+    } else {
+      if (*parent != NULL) {
+        fat32_fs_object_free(*parent);
+      }
+      *parent = parent_object;
+    }
 
-    parent = child;
+    parent_object = child;
 
     token = strtok_r(NULL, "/", &saveptr);
   }
 
-  *fs_object = parent;
+  *fs_object = parent_object;
 
   // making cleanup code not to free returned object
-  parent      = NULL;
-  return_code = FE_OK;
+  parent_object = NULL;
+  parent        = NULL;
+  return_code   = FE_OK;
 
 cleanup:
   if (path_copy != NULL) {
@@ -347,8 +360,12 @@ cleanup:
     fat32_diriter_free(diriter);
   }
 
-  if (parent != NULL) {
-    fat32_fs_object_free(parent);
+  if (parent_object != NULL) {
+    fat32_fs_object_free(parent_object);
+  }
+
+  if (parent != NULL && *parent != NULL) {
+    fat32_fs_object_free(*parent);
   }
 
   return return_code;
