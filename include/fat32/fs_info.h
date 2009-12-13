@@ -5,7 +5,8 @@
  *
  * @brief  FSInfo structures and related function's prototypes.
  *
- *
+ * @todo keep correct free space hint
+ * @todo keep correct free cluster hint
  */
 #ifndef _FS_INFO_H_
 #define _FS_INFO_H_
