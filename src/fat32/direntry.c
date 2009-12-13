@@ -27,7 +27,7 @@ static const uint8_t EMPTY = 0xe5;
 static const uint8_t LAST  = 0x00;
 
 bool
-fat32_direntry_is_empty(const struct fat32_direntry_t *direntry)
+fat32_direntry_is_free(const struct fat32_direntry_t *direntry)
 {
   const uint8_t *name = direntry->name;
 

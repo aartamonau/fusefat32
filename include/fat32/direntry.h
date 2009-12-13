@@ -89,7 +89,7 @@ struct fat32_direntry_t {
  * @return boolean value showing whether direnty is empty
  */
 bool
-fat32_direntry_is_empty(const struct fat32_direntry_t *direntry);
+fat32_direntry_is_free(const struct fat32_direntry_t *direntry);
 
 /**
  * Determines whether direntry is last in the directory.

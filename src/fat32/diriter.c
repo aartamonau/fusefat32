@@ -56,7 +56,7 @@ suitable_direntry(const struct fat32_direntry_t *direntry,
     return true;
   }
 
-  bool result = (!fat32_direntry_is_empty(direntry) &&
+  bool result = (!fat32_direntry_is_free(direntry) &&
                  (fat32_direntry_is_directory(direntry) ||
                   fat32_direntry_is_file(direntry)));
   if (list_dots) {
