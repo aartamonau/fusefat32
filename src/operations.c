@@ -5,7 +5,8 @@
  *
  * @brief  Implementation of FUSE operations.
  *
- *
+ * @todo Make code checking #fat32_error_t result of some operation consistent.
+ * @todo Name validation.
  */
 
 #include <assert.h>
@@ -60,6 +61,64 @@ fs_object_attrs(const struct fat32_fs_object_t *fs_object,
 }
 
 /**
+ * Actually deletes a file under assumption that it's not open.
+ *
+ * @param fs   File system structure.
+ * @param path A path to file to delete.
+ *
+ * @return Operation result.
+ */
+int
+fat32_perform_unlink(struct fat32_fs_t *fs, const char *path)
+{
+  struct fat32_fs_object_t *fs_object;
+  enum fat32_error_t        ret =
+    fat32_fs_get_object(fs, path, &fs_object, NULL);
+
+  int retcode;
+
+  switch (ret) {
+  case FE_OK:
+    break;
+  case FE_ERRNO:
+    return -errno;
+  case FE_INVALID_DEV:
+    return -EINVAL;
+  default:
+    assert( false );
+  }
+
+  if (fs_object == NULL) {
+    return -ENOENT;
+  }
+
+  if (fat32_fs_object_is_directory(fs_object)) {
+    return -EISDIR;
+  }
+
+  uint32_t cluster = fat32_fs_object_first_cluster(fs_object);
+  if (fat32_fs_object_mark_free(fs_object) == FE_ERRNO) {
+    retcode = -errno;
+    goto cleanup;
+  }
+
+  ret = fat32_fat_mark_cluster_chain_free(fs_object->fs->fat, cluster);
+  if (ret != FE_OK) {
+    /* As direnty is already marked as free generally we can only say that
+     * operation has completed successfully and log the error. Actually, the
+     * file system will be in a usable state after this but some clusters won't
+     * be used before fsck will have been performed. */
+    log_error("fat32_perform_unlink: unable to free cluster chain. Run fsck "
+              "to fix the problem");
+  }
+  retcode = FE_OK;
+
+cleanup:
+  fat32_fs_object_free(fs_object);
+  return retcode;
+}
+
+/**
  * Implementation of getattr call.
  *
  * @param      path  a path to file
@@ -78,9 +137,8 @@ fat32_getattr(const char *path, struct stat *stbuf)
   struct fat32_fs_object_t   *fs_object;
 
 
-  enum fat32_error_t ret = fat32_fs_get_object(ff_context->fs,
-                                               path,
-                                               &fs_object);
+  enum fat32_error_t ret =
+    fat32_fs_get_object(ff_context->fs, path, &fs_object, NULL);
   if (ret == FE_OK) {
     if (fs_object == NULL) {
       return -ENOENT;
@@ -131,7 +189,7 @@ fat32_readdir(const char *path, void *buffer, fuse_fill_dir_t filler,
 
   int    retcode;
 
-  ret = fat32_fs_get_object(ff_context->fs, path, &fs_object);
+  ret = fat32_fs_get_object(ff_context->fs, path, &fs_object, NULL);
   switch (ret) {
   case FE_ERRNO:
     return -errno;
@@ -249,9 +307,8 @@ int fat32_open(const char *path, struct fuse_file_info *file_info)
     (struct fusefat32_context_t *) context->private_data;
   struct fat32_fs_object_t   *fs_object;
 
-  enum fat32_error_t ret = fat32_fs_get_object(ff_context->fs,
-                                               path,
-                                               &fs_object);
+  enum fat32_error_t ret =
+    fat32_fs_get_object(ff_context->fs, path, &fs_object, NULL);
   int                retcode;
 
 
@@ -449,10 +506,37 @@ fat32_read(const char *path, char *buffer, size_t size, off_t offset,
   return overall;
 }
 
+/**
+ * Implements unlink system call.
+ *
+ * @param path A path to file.
+ *
+ * @return Result of operation.
+ */
+int
+fat32_unlink(const char *path)
+{
+  struct fuse_context        *context    = fuse_get_context();
+  struct fusefat32_context_t *ff_context =
+    (struct fusefat32_context_t *) context->private_data;
+  struct fat32_fs_t          *fs         = ff_context->fs;
+
+  struct fat32_file_info_t   *file_info =
+    hash_table_lookup(fs->file_table, path);
+
+  /* TODO: for now we don't implement UNIX semantic of deletion */
+  if (file_info == NULL) {
+    return fat32_perform_unlink(fs, path);
+  } else {
+    return -EBUSY;
+  }
+}
+
 const struct fuse_operations fusefat32_operations = {
   .readdir = fat32_readdir,
   .getattr = fat32_getattr,
   .open    = fat32_open,
   .release = fat32_release,
   .read    = fat32_read,
+  .unlink  = fat32_unlink,
 };
