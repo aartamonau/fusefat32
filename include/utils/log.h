@@ -83,6 +83,21 @@ int
 log_message(enum log_level_t level, const char *format, ...);
 
 /**
+ * Logs a message adding additional information about a file and a caller.
+ *
+ * @param level    Importance level of the message.
+ * @param file     A name of the caller file.
+ * @param function A name of the caller function.
+ * @param format   @em printf format string.
+ *
+ * @return 0 on success. -1 on error. Error type is indicated by @em errno.
+ */
+int
+log_message_loc(enum log_level_t level,
+                const char *file, const char *function,
+                const char *format, ...);
+
+/**
  * Log a message of LOG_DEBUG importance level.
  *
  * @param format @em printf format string
@@ -141,5 +156,73 @@ log_message(enum log_level_t level, const char *format, ...);
  */
 #define log_critical(format, ...)     \
   log_message(LOG_CRITICAL, format, ##__VA_ARGS__)
+
+
+
+/**
+ * Log a message of LOG_DEBUG importance level.
+ * Logs current file and function name additionally.
+ *
+ * @param format @em printf format string
+ *
+ * @return 0 on success. -1 on error. Error type is indicated by @em errno.
+ */
+#define log_debug_loc(format, ...)      \
+  log_message_loc(LOG_DEBUG, __FILE__, __func__, format, ##__VA_ARGS__)
+
+/**
+ * Log a message of LOG_INFO importance level.
+ * Logs current file and function name additionally.
+ *
+ * @param format @em printf format string
+ *
+ * @return 0 on success. -1 on error. Error type is indicated by @em errno.
+ */
+#define log_info_loc(format, ...)       \
+  log_message_loc(LOG_INFO, __FILE__, __func__, format, ##__VA_ARGS__)
+
+/**
+ * Log a message of LOG_NOTICE importance level.
+ * Logs current file and function name additionally.
+ *
+ * @param format @em printf format string
+ *
+ * @return 0 on success. -1 on error. Error type is indicated by @em errno.
+ */
+#define log_notice_loc(format, ...)       \
+  log_message_loc(LOG_NOTICE, __FILE__, __func__, format, ##__VA_ARGS__)
+
+/**
+ * Log a message of LOG_WARNING importance level.
+ * Logs current file and function name additionally.
+ *
+ * @param format @em printf format string
+ *
+ * @return 0 on success. -1 on error. Error type is indicated by @em errno.
+ */
+#define log_warning_loc(format, ...)    \
+  log_message_loc(LOG_WARNING, __FILE__, __func__, format, ##__VA_ARGS__)
+
+/**
+ * Log a message of LOG_ERROR importance level.
+ * Logs current file and function name additionally.
+ *
+ * @param format @em printf format string
+ *
+ * @return 0 on success. -1 on error. Error type is indicated by @em errno.
+ */
+#define log_error_loc(format, ...)      \
+  log_message_loc(LOG_ERROR, __FILE__, __func__, format, ##__VA_ARGS__)
+
+/**
+ * Log a message of LOG_CRITICAL importance level.
+ * Logs current file and function name additionally.
+ *
+ * @param format @em printf format string
+ *
+ * @return 0 on success. -1 on error. Error type is indicated by @em errno.
+ */
+#define log_critical_loc(format, ...)     \
+  log_message_loc(LOG_CRITICAL, __FILE__, __func__, format,##__VA_ARGS__)
 
 #endif /* _LOG_H_ */

@@ -89,6 +89,41 @@ log_close(void)
   return 0;
 }
 
+/**
+ * Does actual job needed to log some message. Does not acquire log lock.
+ *
+ * @param level   Importance level.
+ * @param format  Format string.
+ * @param arglist Argument list.
+ *
+ * @return 0 on success. -1 on error. Error type is indicated by @em errno.
+ */
+static int
+do_log_message(enum log_level_t level, const char *format, va_list arglist)
+{
+  int ioret = fprintf(log_file, "%s: ", LEVEL_MESSAGES[level]);
+  if (ioret < 0) {
+    return -1;
+  }
+
+  ioret = vfprintf(log_file, format, arglist);
+  if (ioret < 0) {
+    return -1;
+  }
+
+  ioret = fflush(log_file);
+  if (ioret == EOF) {
+    return -1;
+  }
+
+  ioret = fputs("\n", log_file);
+  if (ioret < 0) {
+    return -1;
+  }
+
+  return 0;
+}
+
 int
 log_message(enum log_level_t level, const char *format, ...)
 {
@@ -104,36 +139,55 @@ log_message(enum log_level_t level, const char *format, ...)
 
   int ret    = pthread_mutex_lock(&log_lock);
   if (ret == 0) {
-    int ioret = fprintf(log_file, "%s: ", LEVEL_MESSAGES[level]);
+    va_list arglist;
+    va_start(arglist, format);
+
+    int ioret = do_log_message(level, format, arglist);
+    va_end(arglist);
+
+    result = ioret;
+  } else {
+    return -1;
+  }
+
+  assert( pthread_mutex_unlock(&log_lock) == 0 );
+  return result;
+}
+
+int
+log_message_loc(enum log_level_t level,
+                const char *file, const char *function,
+                const char *format, ...)
+{
+  if (log_file == NULL) {
+    return 0;
+  }
+
+  if (level < log_level) {
+    return 0;
+  }
+
+  int result = 0;
+
+  int ret = pthread_mutex_lock(&log_lock);
+  if (ret == 0) {
+    int ioret = fprintf(log_file, "%s : %s - ", file, function);
     if (ioret < 0) {
       result = -1;
-      goto log_message_unlock;
+      goto cleanup;
     }
 
     va_list arglist;
     va_start(arglist, format);
-    ioret = vfprintf(log_file, format, arglist);
+
+    ioret = do_log_message(level, format, arglist);
     va_end(arglist);
 
-    if (ioret < 0) {
-      result = -1;
-      goto log_message_unlock;
-    }
-
-    ioret = fflush(log_file);
-    if (ioret == EOF) {
-      result = -1;
-      goto log_message_unlock;
-    }
-
-    ioret = fputs("\n", log_file);
-    if (ioret < 0) {
-      result = -1;
-      goto log_message_unlock;
-    }
+    result = ioret;
+  } else {
+    return -1;
   }
-
- log_message_unlock:
+cleanup:
   assert( pthread_mutex_unlock(&log_lock) == 0 );
   return result;
 }
