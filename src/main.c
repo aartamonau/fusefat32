@@ -115,20 +115,22 @@ fusefat32_process_options(void *data, const char *arg, int key,
     /* discard option */
     return 0;
   case FUSE_OPT_KEY_NONOPT:
-    if (config->parent_dir == NULL) {
+    if (config->mount_point == NULL) {
       char *path;
 
       if ((path = realpath(arg, NULL)) == NULL) {
-        fprintf(stderr, _("fusefat32: Bad mountpoint `%s`: %s\n"),
+        fprintf(stderr, _("fusefat32: Bad mount point `%s`: %s\n"),
                 arg, strerror(errno));
         return -1;
       } else {
-        config->parent_dir = strdup(dirname(path));
-        if (config->parent_dir == NULL) {
+        config->mount_point = strdup(path);
+        if (config->mount_point == NULL) {
           fputs(_("fusefat32: Memory allocation error\n"), stderr);
           return -1;
         }
         free(path);
+
+        /* keeping mount point for usual processing */
         return 1;
       }
     } else {
@@ -174,6 +176,12 @@ main(int argc, char *argv[])
   if (config->device == NULL) {
     fputs(_("A device to mount must be specified (use `dev` option)\n"),
       stderr);
+
+    goto main_cleanup;
+  }
+
+  if (config->mount_point == NULL) {
+    fputs(_("A mount point must be specified\n"), stderr);
 
     goto main_cleanup;
   }
@@ -266,8 +274,8 @@ main(int argc, char *argv[])
   }
 
   if (config != NULL) {
-    if (config->parent_dir != NULL) {
-      free(config->parent_dir);
+    if (config->mount_point != NULL) {
+      free(config->mount_point);
     }
   }
 
