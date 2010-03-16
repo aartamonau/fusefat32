@@ -50,6 +50,7 @@ fs_object_attrs(const struct fat32_fs_object_t *fs_object,
                 struct stat *stbuf)
 {
   /* TODO: command-line options */
+  /* TODO: correct number of links for directories must be set */
   if (fat32_fs_object_is_directory(fs_object)) {
     stbuf->st_mode    = S_IFDIR | 0755;
     stbuf->st_nlink   = 1;
@@ -232,20 +233,10 @@ fat32_readdir(const char *path, void *buffer, fuse_fill_dir_t filler,
 
   /* adding . and .. for root directory */
   if (fat32_fs_object_is_root_directory(fs_object)) {
-    struct fusefat32_config_t *config = &ff_context->config;
-
-    if (stat(config->parent_dir, &stbuf) != 0) {
-      retcode = -errno;
-      goto cleanup;
-    }
-
-    if (filler(buffer, "..", &stbuf, 0) != 0) {
-      retcode = -errno;
-      goto cleanup;
-    }
-
+    /* both .. and . of the root directory usually point to the root itself */
     fs_object_attrs(fs_object, &stbuf);
-    if (filler(buffer, ".", &stbuf, 0) != 0) {
+    if (filler(buffer, "..", &stbuf, 0) != 0 ||
+        filler(buffer, ".", &stbuf, 0) != 0) {
       retcode = -errno;
       goto cleanup;
     }
