@@ -311,6 +311,11 @@ fat32_fs_get_object(const struct fat32_fs_t *fs,
           /* wrong path */
           *fs_object = NULL;
 
+          if (parent != NULL) {
+            /* saving parent directory */
+            parent = NULL;
+          }
+
           return_code = FE_OK;
           goto cleanup;
         }

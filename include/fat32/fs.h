@@ -123,7 +123,10 @@ fat32_fs_read_cluster(const struct fat32_fs_t *fs, void *buffer,
  * @param[out] fs_object File system object stored here on success. NULL is
  *                       stored if object with given path can't be found.
  * @param[out] parent    If this parameter is not NULL then a parent of
- *                       fs_object is stored here.
+ *                       fs_object is stored here. Even if wrong path is
+ *                       specified then the last directory checked is stored
+ *                       in this parameter.
+ *                       NULL is returned as a parent for root directory.
  *
  * @retval FE_OK
  * @retval FE_ERRNO       IO errors while working with device.
